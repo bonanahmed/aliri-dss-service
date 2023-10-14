@@ -1,22 +1,22 @@
-import express from "express";
-import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import cors from "cors";
-import passport from "passport";
+import express from 'express';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import cors from 'cors';
+import passport from 'passport';
 
-import routes from "./routes/v1";
+import routes from './routes/v1';
 
-import { json, urlencoded } from "body-parser";
-import { jwtStrategy } from "./config/passport";
-import { errorConverter, errorHandler } from "./middlewares/error";
+import { json, urlencoded } from 'body-parser';
+import { jwtStrategy } from './config/passport';
+import { errorConverter, errorHandler } from './middlewares/error';
 
 const app = express();
 
 // set security HTTP headers
 app.use(helmet());
 
-app.use(json());
-app.use(urlencoded({ extended: true }));
+app.use(json({ limit: '10mb' }));
+app.use(urlencoded({ limit: '10mb', extended: true }));
 
 // sanitize request data
 app.use(mongoSanitize());
@@ -26,14 +26,14 @@ app.use(mongoSanitize());
 
 // enable cors
 app.use(cors());
-app.options("*", cors());
+app.options('*', cors());
 
 // jwt authentication
 app.use(passport.initialize());
-passport.use("jwt", jwtStrategy);
+passport.use('jwt', jwtStrategy);
 
 //v1 api routes
-app.use("/api/v1", routes);
+app.use('/api/v1', routes);
 
 // convert error to ApiError, if needed
 app.use(errorConverter);

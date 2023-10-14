@@ -1,32 +1,23 @@
-import { Request, Response, NextFunction } from "express";
-import passport from "passport";
-import httpStatus from "http-status";
-import ApiError from "../utils/ApiError";
-import { roleRights } from "../config/roles";
-import { IAccountDocument } from "../models/account/mongoose";
+import { Request, Response, NextFunction } from 'express';
+import passport from 'passport';
+import httpStatus from 'http-status';
+import ApiError from '../utils/ApiError';
+import { roleRights } from '../config/roles';
+import { IAccountDocument } from '../models/account/mongoose';
 
 const verifyCallback =
-  (
-    req: Request,
-    resolve: () => void,
-    reject: (error: ApiError) => void,
-    requiredRights: string[]
-  ) =>
+  (req: Request, resolve: () => void, reject: (error: ApiError) => void, requiredRights: string[]) =>
   async (err: Error, user: IAccountDocument, info: any) => {
     if (err || info || !user) {
-      return reject(
-        new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate")
-      );
+      return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
     }
     req.user = user;
 
     if (requiredRights.length) {
       const userRights = roleRights.get(user.role);
-      const hasRequiredRights = requiredRights.every((requiredRight) =>
-        userRights?.includes(requiredRight)
-      );
+      const hasRequiredRights = requiredRights.every((requiredRight) => userRights?.includes(requiredRight));
       if (!hasRequiredRights && req.params.userId !== user.id) {
-        return reject(new ApiError(httpStatus.FORBIDDEN, "Forbidden"));
+        return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
       }
     }
 
@@ -37,11 +28,7 @@ const auth =
   (...requiredRights: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     return new Promise<void>((resolve, reject) => {
-      passport.authenticate(
-        "jwt",
-        { session: false },
-        verifyCallback(req, resolve, reject, requiredRights)
-      )(req, res, next);
+      passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
     })
       .then(() => next())
       .catch((err) => next(err));

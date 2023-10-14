@@ -1,25 +1,23 @@
-import httpStatus from "http-status";
-import ApiError from "../utils/ApiError";
-import { Account } from "../models/account";
-import { tokenService } from ".";
-import { Token } from "../models/token";
-import { tokenTypes } from "../config/tokens";
-import bcrypt from "bcrypt";
-import { IAccountDocument } from "../models/account/mongoose";
+import httpStatus from 'http-status';
+import ApiError from '../utils/ApiError';
+import { Account } from '../models/account';
+import { tokenService } from '.';
+import { Token } from '../models/token';
+import { tokenTypes } from '../config/tokens';
+import bcrypt from 'bcrypt';
+import { IAccountDocument } from '../models/account/mongoose';
 /**
  * Login with username and password
  * @param {string} username
  * @param {string} password
  * @returns {Promise<IAccountDocument>}
  */
-const loginWithUsernameAndPassword = async (
-  username: string,
-  password: string
-): Promise<IAccountDocument> => {
+const loginWithUsernameAndPassword = async (username: string, password: string): Promise<IAccountDocument> => {
+  console.log('password', password);
   const account = await Account.findOne({ username: username });
-  const passwordIsMatch = await bcrypt.compare(password, account!.password);
-  if (!account || passwordIsMatch || !password) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
+  const passwordIsMatch = await bcrypt.compare(password, account?.password ?? '');
+  if (!account || !passwordIsMatch || !password) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
 
   return account;
@@ -32,7 +30,7 @@ const loginWithUsernameAndPassword = async (
  */
 const registerAccount = async (accountBody: any): Promise<any> => {
   if (await Account.isUsernameTaken(accountBody.username)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Username already taken");
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Username already taken');
   }
   return await Account.create(accountBody);
 };
@@ -49,7 +47,7 @@ const logout = async (refreshToken: string): Promise<void> => {
     blacklisted: false,
   });
   if (!refreshTokenDoc) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Not found");
+    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
   }
   await refreshTokenDoc.deleteOne({ token: refreshTokenDoc.token });
 };
@@ -59,14 +57,9 @@ const logout = async (refreshToken: string): Promise<void> => {
  * @param {string} refreshToken
  * @returns {Promise<Object>}
  */
-const refreshAuth = async (
-  refreshToken: string
-): Promise<{ access: any; refresh: any }> => {
+const refreshAuth = async (refreshToken: string): Promise<{ access: any; refresh: any }> => {
   try {
-    const refreshTokenDoc = await tokenService.verifyToken(
-      refreshToken,
-      tokenTypes.REFRESH
-    );
+    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
     const account = await Account.findById(refreshTokenDoc.account);
     if (!account) {
       throw new Error();
@@ -75,7 +68,7 @@ const refreshAuth = async (
     const tokens = await tokenService.generateAuthTokens(account);
     return tokens;
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate");
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
   }
 };
 
@@ -85,15 +78,9 @@ const refreshAuth = async (
  * @param {string} newPassword
  * @returns {Promise<void>}
  */
-const resetPassword = async (
-  resetPasswordToken: string,
-  newPassword: string
-): Promise<void> => {
+const resetPassword = async (resetPasswordToken: string, newPassword: string): Promise<void> => {
   try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(
-      resetPasswordToken,
-      tokenTypes.RESET_PASSWORD
-    );
+    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
     const account = await Account.findById(resetPasswordTokenDoc.account);
     if (!account) {
       throw new Error();
@@ -104,7 +91,7 @@ const resetPassword = async (
       type: tokenTypes.RESET_PASSWORD,
     });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Password reset failed");
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
   }
 };
 
@@ -115,10 +102,7 @@ const resetPassword = async (
  */
 const verifyEmail = async (verifyEmailToken: string): Promise<void> => {
   try {
-    const verifyEmailTokenDoc = await tokenService.verifyToken(
-      verifyEmailToken,
-      tokenTypes.VERIFY_EMAIL
-    );
+    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
     const user = await Account.findById(verifyEmailTokenDoc.account);
     if (!user) {
       throw new Error();
@@ -129,7 +113,7 @@ const verifyEmail = async (verifyEmailToken: string): Promise<void> => {
     });
     await Account.updateOne({ _id: user.id }, { isEmailVerified: true });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Email verification failed");
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
   }
 };
 
@@ -138,9 +122,7 @@ const verifyEmail = async (verifyEmailToken: string): Promise<void> => {
  * @param {string} username
  * @returns {Promise<User>}
  */
-const getAccountByUsername = async (
-  username: string
-): Promise<IAccountDocument | null> => {
+const getAccountByUsername = async (username: string): Promise<IAccountDocument | null> => {
   return await Account.findOne({ username });
 };
 

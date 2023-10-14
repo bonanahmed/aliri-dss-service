@@ -1,3 +1,10 @@
-export * as authController from "./auth.controller";
-export * as userController from "./user.controller";
-export * as templateController from "./template.controller";
+export * as authController from './auth.controller';
+export * as userController from './user.controller';
+export * as templateController from './template.controller';
+export * as lineController from './line.controller';
+export * as nodeController from './node.controller';
+export * as areaController from './area.controller';
+export * as pastenController from './pasten.controller';
+export * as plantPatternController from './plant-pattern.controller';
+export * as plantPatternTemplateController from './plant-pattern-template.controller';
+export * as groupController from './group.controller';

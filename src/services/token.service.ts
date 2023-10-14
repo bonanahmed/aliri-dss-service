@@ -1,12 +1,12 @@
-import jwt from "jsonwebtoken";
-import moment from "moment";
-import httpStatus from "http-status";
-import config from "../config/config";
-import * as authService from "./auth.service";
-import { Token } from "../models/token";
-import ApiError from "../utils/ApiError";
-import { tokenTypes } from "../config/tokens";
-import { IAccountDocument } from "../models/account/mongoose";
+import jwt from 'jsonwebtoken';
+import moment from 'moment';
+import httpStatus from 'http-status';
+import config from '../config/config';
+import * as authService from './auth.service';
+import { Token } from '../models/token';
+import ApiError from '../utils/ApiError';
+import { tokenTypes } from '../config/tokens';
+import { IAccountDocument } from '../models/account/mongoose';
 
 /**
  * Generate token
@@ -49,7 +49,7 @@ const saveToken = async (
 ): Promise<any> => {
   const tokenDoc = await Token.create({
     token,
-    account: account,
+    account_id: account,
     expires: expires.toDate(),
     type,
     blacklisted,
@@ -72,7 +72,7 @@ const verifyToken = async (token: string, type: string): Promise<any> => {
     blacklisted: false,
   });
   if (!tokenDoc) {
-    throw new Error("Token not found");
+    throw new Error('Token not found');
   }
   return tokenDoc;
 };
@@ -83,31 +83,12 @@ const verifyToken = async (token: string, type: string): Promise<any> => {
  * @returns {Promise<Object>}
  */
 const generateAuthTokens = async (account: IAccountDocument): Promise<any> => {
-  const accessTokenExpires = moment().add(
-    config.jwt.accessExpirationMinutes,
-    "minutes"
-  );
-  const accessToken = generateToken(
-    account.id,
-    accessTokenExpires,
-    tokenTypes.ACCESS
-  );
+  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+  const accessToken = generateToken(account.id, accessTokenExpires, tokenTypes.ACCESS);
 
-  const refreshTokenExpires = moment().add(
-    config.jwt.refreshExpirationDays,
-    "days"
-  );
-  const refreshToken = generateToken(
-    account.id,
-    refreshTokenExpires,
-    tokenTypes.REFRESH
-  );
-  await saveToken(
-    refreshToken,
-    account._id,
-    refreshTokenExpires,
-    tokenTypes.REFRESH
-  );
+  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
+  const refreshToken = generateToken(account.id, refreshTokenExpires, tokenTypes.REFRESH);
+  await saveToken(refreshToken, account.id, refreshTokenExpires, tokenTypes.REFRESH);
 
   return {
     access: {
@@ -126,31 +107,14 @@ const generateAuthTokens = async (account: IAccountDocument): Promise<any> => {
  * @param {string} username
  * @returns {Promise<string>}
  */
-const generateResetPasswordToken = async (
-  username: string
-): Promise<string> => {
+const generateResetPasswordToken = async (username: string): Promise<string> => {
   const account = await authService.getAccountByUsername(username);
   if (!account) {
-    throw new ApiError(
-      httpStatus.NOT_FOUND,
-      "No accounts found with this email"
-    );
+    throw new ApiError(httpStatus.NOT_FOUND, 'No accounts found with this email');
   }
-  const expires = moment().add(
-    config.jwt.resetPasswordExpirationMinutes,
-    "minutes"
-  );
-  const resetPasswordToken = generateToken(
-    account.id,
-    expires,
-    tokenTypes.RESET_PASSWORD
-  );
-  await saveToken(
-    resetPasswordToken,
-    account.id,
-    expires,
-    tokenTypes.RESET_PASSWORD
-  );
+  const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
+  const resetPasswordToken = generateToken(account.id, expires, tokenTypes.RESET_PASSWORD);
+  await saveToken(resetPasswordToken, account.id, expires, tokenTypes.RESET_PASSWORD);
   return resetPasswordToken;
 };
 
@@ -159,32 +123,11 @@ const generateResetPasswordToken = async (
  * @param {Account} account
  * @returns {Promise<string>}
  */
-const generateVerifyEmailToken = async (
-  account: IAccountDocument
-): Promise<string> => {
-  const expires = moment().add(
-    config.jwt.verifyEmailExpirationMinutes,
-    "minutes"
-  );
-  const verifyEmailToken = generateToken(
-    account.id,
-    expires,
-    tokenTypes.VERIFY_EMAIL
-  );
-  await saveToken(
-    verifyEmailToken,
-    account.id,
-    expires,
-    tokenTypes.VERIFY_EMAIL
-  );
+const generateVerifyEmailToken = async (account: IAccountDocument): Promise<string> => {
+  const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
+  const verifyEmailToken = generateToken(account.id, expires, tokenTypes.VERIFY_EMAIL);
+  await saveToken(verifyEmailToken, account.id, expires, tokenTypes.VERIFY_EMAIL);
   return verifyEmailToken;
 };
 
-export {
-  generateToken,
-  saveToken,
-  verifyToken,
-  generateAuthTokens,
-  generateResetPasswordToken,
-  generateVerifyEmailToken,
-};
+export { generateToken, saveToken, verifyToken, generateAuthTokens, generateResetPasswordToken, generateVerifyEmailToken };

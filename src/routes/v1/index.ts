@@ -1,7 +1,14 @@
-import express from "express";
-import authRoute from "./auth.route";
-import userRoute from "./user.route";
-import templateRoute from "./template.route";
+import express from 'express';
+import authRoute from './auth.route';
+import userRoute from './user.route';
+import templateRoute from './template.route';
+import lineRoute from './line.route';
+import nodeRoute from './node.route';
+import areaRoute from './area.route';
+import pastenRoute from './pasten.route';
+import plantPattern from './plant-pattern.route';
+import plantPatternTemplate from './plant-pattern-template.route';
+import groupRoute from './group.route';
 // import docsRoute from "./docs.route";
 // import config from "../../config/config";
 
@@ -9,20 +16,44 @@ const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: "/auth",
+    path: '/auth',
     route: authRoute,
   },
   {
-    path: "/users",
+    path: '/users',
     route: userRoute,
   },
   {
-    path: "/template",
+    path: '/templates',
     route: templateRoute,
   },
   {
-    path: "/",
-    route: templateRoute,
+    path: '/lines',
+    route: lineRoute,
+  },
+  {
+    path: '/nodes',
+    route: nodeRoute,
+  },
+  {
+    path: '/areas',
+    route: areaRoute,
+  },
+  {
+    path: '/plant-pattern',
+    route: plantPattern,
+  },
+  {
+    path: '/pastens',
+    route: pastenRoute,
+  },
+  {
+    path: '/plant-pattern-templates',
+    route: plantPatternTemplate,
+  },
+  {
+    path: '/groups',
+    route: groupRoute,
   },
 ];
 

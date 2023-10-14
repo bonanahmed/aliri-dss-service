@@ -5,7 +5,7 @@ import { ITemplateDocument } from '../models/template/mongoose';
 
 /**
  * Create a user
- * @param {Object} userBody
+ * @param {Object} body
  * @returns {Promise<ITemplateDocument>}
  */
 const createTemplate = async (body: any): Promise<ITemplateDocument> => {
@@ -33,15 +33,6 @@ const getTemplates = async (filter: any, options: any): Promise<any> => {
  */
 const getTemplateById = async (id: string): Promise<ITemplateDocument | null> => {
   return Template.findById(id);
-};
-
-/**
- * Get user by email
- * @param {string} email
- * @returns {Promise<ITemplateDocument | null>}
- */
-const getTemplateByEmail = async (email: string): Promise<ITemplateDocument | null> => {
-  return Template.findOne({ email });
 };
 
 /**
@@ -74,4 +65,4 @@ const deleteTemplateById = async (templateId: string): Promise<ITemplateDocument
   return template;
 };
 
-export { createTemplate, getTemplates, getTemplateById, getTemplateByEmail, updateTemplateById, deleteTemplateById };
+export { createTemplate, getTemplates, getTemplateById, updateTemplateById, deleteTemplateById };
