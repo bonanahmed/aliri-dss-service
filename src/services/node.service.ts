@@ -22,6 +22,13 @@ const createNode = async (body: any): Promise<INodeDocument> => {
  * @returns {Promise<any>}
  */
 const getNodes = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [
+      { code: { $regex: new RegExp(filter.search, 'i') } },
+      { name: { $regex: new RegExp(filter.search, 'i') } },
+    ];
+    delete filter.search;
+  }
   const nodes = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return nodes;
 };

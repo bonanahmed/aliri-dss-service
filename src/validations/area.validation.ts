@@ -16,6 +16,7 @@ const createArea = {
 
 const getAreas = {
   query: Joi.object().keys({
+    search: Joi.string(),
     parent_id: Joi.string(),
     node_id: Joi.string(),
     type: Joi.string(),

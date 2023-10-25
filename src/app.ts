@@ -25,7 +25,22 @@ app.use(mongoSanitize());
 // app.use(compression());
 
 // enable cors
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  // Add more origins as needed
+];
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  })
+);
 app.options('*', cors());
 
 // jwt authentication

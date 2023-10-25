@@ -12,7 +12,7 @@ const createPlantPatternTemplate = catchAsync(async (req, res) => {
 });
 
 const getPlantPatternTemplates = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['name', 'role']);
+  const filter = pick(req.query, ['search']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await plantPatternTemplateService.getPlantPatternTemplates(filter, options);
   // res.send(result);

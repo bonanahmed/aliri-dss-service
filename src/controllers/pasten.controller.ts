@@ -12,7 +12,7 @@ const createPasten = catchAsync(async (req, res) => {
 });
 
 const getPastens = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['name', 'role']);
+  const filter = pick(req.query, ['search']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await pastenService.getPastens(filter, options);
   // res.send(result);

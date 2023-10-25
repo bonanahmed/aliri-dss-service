@@ -12,8 +12,6 @@ import { PlantPatternTemplate } from '../models/plant-pattern-template';
  * @returns {Promise<IPlantPatternDocument>}
  */
 const savePlantPattern = async (body: any, date: string): Promise<any> => {
-  console.log(body);
-
   const areas = body;
   await PlantPattern.deleteMany({
     date: { $regex: `^${date}` },
@@ -45,6 +43,7 @@ const getPlantPatterns = async (filter: any, options: any, date: any): Promise<a
     lines.docs.map(async (line: any) => {
       const area: any = await Area.findOne({
         line_id: line.id,
+        type: 'petak tersier',
       }).populate('detail.group');
       const plant_patterns = await PlantPattern.find({
         area_id: area?.id,

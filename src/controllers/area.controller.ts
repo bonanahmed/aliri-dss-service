@@ -11,7 +11,7 @@ const createArea = catchAsync(async (req, res) => {
 });
 
 const getAreas = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['type', 'parent_id']);
+  const filter = pick(req.query, ['search', 'type', 'parent_id']);
   const options = {
     ...pick(req.query, ['sortBy', 'limit', 'page']),
   };

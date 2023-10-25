@@ -22,6 +22,10 @@ const createPasten = async (body: any): Promise<IPastenDocument> => {
  * @returns {Promise<any>}
  */
 const getPastens = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ code: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
   const pastens = options.limit ? await Pasten.paginate(filter, options) : await Pasten.find(filter);
   return pastens;
 };

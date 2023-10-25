@@ -51,5 +51,18 @@ areaSchema.pre('find', function (next) {
   ]);
   next();
 });
+areaSchema.pre('findOne', function (next) {
+  // Use `populate()` to automatically populate the fields
+  this.populate([
+    { path: 'detail.group', options: { strictPopulate: false } },
+    // { path: 'parent_id', options: { strictPopulate: false } },
+    // {
+    //   path: 'line_id',
+    //   options: { strictPopulate: false },
+    //   populate: { path: 'node_id', options: { strictPopulate: false } },
+    // },
+  ]);
+  next();
+});
 const Area = mongoose.model<IAreaDocument, PaginateModel<IAreaDocument> & IAreaModel>('areas', areaSchema, 'areas');
 export default Area;

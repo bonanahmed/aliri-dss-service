@@ -22,6 +22,13 @@ const createArea = async (body: any): Promise<IAreaDocument> => {
  * @returns {Promise<any>}
  */
 const getAreas = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [
+      { name: { $regex: new RegExp(filter.search, 'i') } },
+      { code: { $regex: new RegExp(filter.search, 'i') } },
+    ];
+    delete filter.search;
+  }
   const areas = options.limit ? await Area.paginate(filter, options) : await Area.find(filter);
   return areas;
 };

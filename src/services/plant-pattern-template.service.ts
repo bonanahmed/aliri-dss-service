@@ -35,6 +35,10 @@ const createPlantPatternTemplate = async (body: any): Promise<any> => {
  * @returns {Promise<any>}
  */
 const getPlantPatternTemplates = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
   const plantPatternTemplateNames: any = options.limit
     ? await PlantPatternTemplateName.paginate(filter, options)
     : await PlantPatternTemplateName.find(filter);
@@ -73,20 +77,39 @@ const getPlantPatternTemplateById = async (id: string): Promise<any | null> => {
 /**
  * Update user by id
  * @param {string} plantPatternTemplateId
- * @param {Object} updateBody
+ * @param {Object} body
  * @returns {Promise<IPlantPatternTemplateDocument | null>}
  */
-const updatePlantPatternTemplateById = async (
-  plantPatternTemplateId: string,
-  updateBody: any
-): Promise<IPlantPatternTemplateDocument | null> => {
+const updatePlantPatternTemplateById = async (plantPatternTemplateId: string, body: any): Promise<any> => {
   const plantPatternTemplate = await getPlantPatternTemplateById(plantPatternTemplateId);
   if (!plantPatternTemplate) {
     throw new ApiError(httpStatus.NOT_FOUND, 'PlantPatternTemplate not found');
   }
-  Object.assign(plantPatternTemplate, updateBody);
-  await plantPatternTemplate.save();
-  return plantPatternTemplate;
+  // Object.assign(plantPatternTemplate, updateBody);
+  // await plantPatternTemplate.save();
+  await PlantPatternTemplateName.findByIdAndUpdate(plantPatternTemplateId, body);
+  await PlantPatternTemplate.deleteMany({
+    plant_pattern_template_name_id: plantPatternTemplateId,
+  });
+
+  const plant_patterns = body.plant_patterns.map((item: any) => {
+    return {
+      plant_pattern_template_name_id: plantPatternTemplateId,
+      code: item.code,
+      color: item.color,
+      date: item.date,
+      growth_time: item.growth_time,
+      pasten: item.pasten,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+      id: undefined,
+    };
+  });
+  const plantPattern = await PlantPatternTemplate.insertMany(plant_patterns);
+  return {
+    plantPatternTemplate,
+    plantPattern,
+  };
 };
 
 /**

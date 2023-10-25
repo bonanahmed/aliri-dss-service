@@ -23,10 +23,18 @@ const createGroup = async (body: any): Promise<IGroupDocument> => {
  * @returns {Promise<any>}
  */
 const getGroups = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
   const groups = options.limit ? await Group.paginate(filter, options) : await Group.find(filter);
   return groups;
 };
 const getGroupsWithPlantPattern = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
   const groups = await Group.find(filter);
   const dataReturns = await Promise.all(
     groups.map(async (group: any, index) => {

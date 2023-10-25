@@ -22,6 +22,10 @@ const createLine = async (body: any): Promise<ILineDocument> => {
  * @returns {Promise<any>}
  */
 const getLines = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ code: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
   const lines = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
   return lines;
 };

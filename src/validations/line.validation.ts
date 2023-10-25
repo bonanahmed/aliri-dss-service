@@ -15,6 +15,7 @@ const createLine = {
 
 const getLines = {
   query: Joi.object().keys({
+    search: Joi.string(),
     parent_id: Joi.string(),
     type: Joi.string(),
     sortBy: Joi.string(),
