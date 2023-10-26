@@ -26,6 +26,10 @@ const getLines = async (filter: any, options: any): Promise<any> => {
     filter.$or = [{ code: { $regex: new RegExp(filter.search, 'i') } }];
     delete filter.search;
   }
+  if (filter.type == '{"$ne":"tersier"}') {
+    filter.type = JSON.parse(filter.type);
+  }
+
   const lines = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
   return lines;
 };

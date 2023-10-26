@@ -5,6 +5,8 @@ import { IPlantPatternDocument } from '../models/plant-pattern/mongoose';
 import { Line } from '../models/line';
 import { Area } from '../models/area';
 import { PlantPatternTemplate } from '../models/plant-pattern-template';
+import { Node } from '../models/node';
+import mongoose from 'mongoose';
 
 /**
  * Create a user
@@ -16,16 +18,24 @@ const savePlantPattern = async (body: any, date: string): Promise<any> => {
   await PlantPattern.deleteMany({
     date: { $regex: `^${date}` },
   });
+  let bodyPlantPatternNew: any = [];
   areas.forEach(async (area: any) => {
     area.plant_patterns.forEach(async (date_plant: any[]) => {
-      const newDocument = new PlantPattern({
+      bodyPlantPatternNew.push({
         ...date_plant,
         line_id: area.line_id,
         area_id: area.id,
+        id: undefined,
       });
-      await newDocument.save();
+      // const newDocument = new PlantPattern({
+      //   ...date_plant,
+      //   line_id: area.line_id,
+      //   area_id: area.id,
+      // });
+      // await newDocument.save();
     });
   });
+  return await PlantPattern.insertMany(bodyPlantPatternNew);
 };
 
 /**
@@ -38,32 +48,52 @@ const savePlantPattern = async (body: any, date: string): Promise<any> => {
  * @returns {Promise<any>}
  */
 const getPlantPatterns = async (filter: any, options: any, date: any): Promise<any> => {
-  let lines: any = await Line.paginate(filter, options);
-  lines.docs = await Promise.all(
-    lines.docs.map(async (line: any) => {
-      const area: any = await Area.findOne({
-        line_id: line.id,
-        type: 'petak tersier',
-      }).populate('detail.group');
-      const plant_patterns = await PlantPattern.find({
-        area_id: area?.id,
-        date: { $regex: `^${date}` },
+  // if (filter.line_id) {
+  //   filter.id = filter.line_id;
+  //   delete filter.line_id;
+  // }
+  let nodes: any = await Node.paginate(filter, options);
+  let data: Array<any> = [];
+  nodes.docs = await Promise.all(
+    nodes.docs.map(async (node: any) => {
+      const lines: any = await Line.find({
+        node_id: node.id,
       });
-      const plant_pattern_plannings = await PlantPatternTemplate.find({
-        plant_pattern_template_name_id: area?.detail?.group.plant_pattern_template_name_id?._id,
-        date: { $regex: `^${date}` },
-      });
-      return {
-        ...area?._doc,
-        id: area?._id,
-        _id: undefined,
-        __v: undefined,
-        plant_patterns: plant_patterns ?? [],
-        plant_pattern_plannings,
-      };
+      if (!lines) return null;
+      const foundData = await Promise.all(
+        lines.map(async (line: any) => {
+          const area: any = await Area.findOne({
+            line_id: line.id,
+            type: 'petak tersier',
+          }).populate('detail.group');
+          if (!area) return null;
+          const plant_patterns = await PlantPattern.find({
+            area_id: area?.id,
+            date: { $regex: `^${date}` },
+          });
+          const plant_pattern_plannings = await PlantPatternTemplate.find({
+            plant_pattern_template_name_id: area?.detail?.group.plant_pattern_template_name_id?._id,
+            date: { $regex: `^${date}` },
+          });
+          return {
+            ...area?._doc,
+            id: area?._id,
+            _id: undefined,
+            __v: undefined,
+            plant_patterns: plant_patterns ?? [],
+            plant_pattern_plannings,
+          };
+        })
+      );
+
+      return foundData;
     })
   );
-  return lines;
+  nodes.docs = nodes.docs.flatMap((item: any) => item);
+  nodes.docs = nodes.docs.filter((node: any) => {
+    return node !== null && node !== undefined;
+  });
+  return nodes;
 };
 
 /**

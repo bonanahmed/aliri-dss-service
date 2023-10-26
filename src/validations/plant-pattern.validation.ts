@@ -15,6 +15,7 @@ const savePlantPattern = {
 
 const getPlantPatterns = {
   query: Joi.object().keys({
+    line_id: Joi.string(),
     type: Joi.string(),
     date: Joi.string(),
     sortBy: Joi.string(),
