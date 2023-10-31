@@ -9,6 +9,7 @@ import pastenRoute from './pasten.route';
 import plantPattern from './plant-pattern.route';
 import plantPatternTemplate from './plant-pattern-template.route';
 import groupRoute from './group.route';
+import dashboardRoute from './dashboard.route';
 // import docsRoute from "./docs.route";
 // import config from "../../config/config";
 
@@ -54,6 +55,10 @@ const defaultRoutes = [
   {
     path: '/groups',
     route: groupRoute,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoute,
   },
 ];
 

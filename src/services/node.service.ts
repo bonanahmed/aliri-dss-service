@@ -2,6 +2,8 @@ import httpStatus from 'http-status';
 import { Node } from '../models/node'; // Import the INodeDocument type from your models
 import ApiError from '../utils/ApiError';
 import { INodeDocument } from '../models/node/mongoose';
+import { Line } from '../models/line';
+import { Area } from '../models/area';
 
 /**
  * Create a user
@@ -72,4 +74,64 @@ const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => 
   return node;
 };
 
-export { createNode, getNodes, getNodeById, updateNodeById, deleteNodeById };
+/**
+ * Generate papan ekpsploitasi
+ * @param {string} nodeId
+ * @returns {Promise<INodeDocument | null>}
+ */
+const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
+  const data: any = await recursiveFunction(nodeId, false, true);
+  const nodeData: any = await Node.findById(nodeId);
+  const uniqueLineNames = [...new Set(data.map((item: any) => item._doc.line_name))];
+  const returnData = uniqueLineNames.map((item: any) => {
+    return {
+      [item]: data.filter((filtered: any) => filtered._doc.line_name == item),
+      titik_bangunan: nodeData.name,
+    };
+  });
+  return returnData;
+};
+const recursiveFunction: any = async (nodeId: string, hasSekunder: boolean, isNotDone: boolean) => {
+  const promises = [];
+  const linesByNodeId: any = await getLinesByNode(nodeId);
+
+  for (const line of linesByNodeId) {
+    const nodesByLine = await getNodesByLine(line.id);
+
+    if (nodesByLine.length !== 0) {
+      hasSekunder = true;
+      if (isNotDone)
+        for (const node of nodesByLine) {
+          const nodeData = await recursiveFunction(node.id, hasSekunder, false);
+          promises.push(...nodeData);
+        }
+    } else {
+      let area: any = await Area.findOne({ line_id: line.id }).populate('line_id');
+
+      if (hasSekunder) {
+        area._doc.line_name = line.node_id?.line_id?.name;
+      } else {
+        area._doc.line_name = line?.name;
+      }
+      area._doc.line_id = {
+        id: area._doc.line_id.id,
+        name: area._doc.line_id.name,
+      };
+      promises.push(area);
+    }
+  }
+
+  const data = await Promise.all(promises);
+  return data;
+};
+
+const getLinesByNode = async (node_id: string) => {
+  const linesByNodeId = await Line.find({ node_id: node_id });
+  return linesByNodeId;
+};
+const getNodesByLine = async (line_id: string) => {
+  const nodesByLine = await Node.find({ line_id: line_id });
+  return nodesByLine;
+};
+
+export { createNode, getNodes, getNodeById, updateNodeById, deleteNodeById, generatePapanEksploitasi };

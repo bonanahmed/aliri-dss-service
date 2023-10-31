@@ -38,4 +38,9 @@ const deleteNode = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, 'delete success', node);
 });
 
-export { createNode, getNodes, getNode, updateNode, deleteNode };
+const generatePapanEksploitasi = catchAsync(async (req, res) => {
+  const node = await nodeService.generatePapanEksploitasi(req.params.nodeId);
+  ApiResponse(res, httpStatus.OK, 'generate success', node);
+});
+
+export { createNode, getNodes, getNode, updateNode, deleteNode, generatePapanEksploitasi };

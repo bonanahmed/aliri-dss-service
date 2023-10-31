@@ -8,3 +8,4 @@ export * as pastenController from './pasten.controller';
 export * as plantPatternController from './plant-pattern.controller';
 export * as plantPatternTemplateController from './plant-pattern-template.controller';
 export * as groupController from './group.controller';
+export * as dashboardController from './dashboard.controller';

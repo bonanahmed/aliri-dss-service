@@ -42,4 +42,6 @@ router
     nodeController.deleteNode
   );
 
+router.route('/generate-papan-eksploitasi/:nodeId').get(nodeController.generatePapanEksploitasi);
+
 export default router;

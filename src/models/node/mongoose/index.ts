@@ -10,6 +10,7 @@ export interface INode extends IDefaultData {
   hierarchy_code?: string;
   type: string;
   parent_id?: mongoose.Schema.Types.ObjectId | null;
+  prev_id?: mongoose.Schema.Types.ObjectId | null;
   line_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
 }
@@ -26,6 +27,7 @@ const nodeSchema = new Schema<INode>({
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   line_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'lines' },
   detail: { type: Object, required: false },
+  prev_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   ...DefaultData,
 });
 
