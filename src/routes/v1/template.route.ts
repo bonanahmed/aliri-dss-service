@@ -1,42 +1,43 @@
-import express from "express";
-import validate from "../../middlewares/validate";
-import * as templateValidation from "../../validations/template.validation";
-import { templateController } from "../../controllers";
+import express from 'express';
+import validate from '../../middlewares/validate';
+import * as templateValidation from '../../validations/template.validation';
+import { templateController } from '../../controllers';
+import auth from '../../middlewares/auth';
 // import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
 router
-  .route("/")
+  .route('/')
   .post(
-    // auth('manageTemplates'),
+    auth(),
     validate(templateValidation.createTemplate),
 
     templateController.createTemplate
   )
   .get(
-    // auth('getTemplates'),
+    auth(),
     validate(templateValidation.getTemplates),
 
     templateController.getTemplates
   );
 
 router
-  .route("/:templateId")
+  .route('/:templateId')
   .get(
-    // auth('getTemplates'),
+    auth(),
     validate(templateValidation.getTemplate),
 
     templateController.getTemplate
   )
   .patch(
-    // auth('manageTemplates'),
+    auth(),
     validate(templateValidation.updateTemplate),
 
     templateController.updateTemplate
   )
   .delete(
-    // auth('manageTemplates'),
+    auth(),
     validate(templateValidation.deleteTemplate),
 
     templateController.deleteTemplate

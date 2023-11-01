@@ -9,31 +9,15 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // auth(),
+    auth(),
     // validate(plantPatternvalidation.savePlantPattern),
-
     plantPatternController.savePlantPattern
   )
-  .get(
-    // auth(),
-    validate(plantPatternvalidation.getPlantPatterns),
-
-    plantPatternController.getPlantPatterns
-  );
+  .get(auth(), validate(plantPatternvalidation.getPlantPatterns), plantPatternController.getPlantPatterns);
 
 router
   .route('/:plantPatternId')
-  .get(
-    // auth(),
-    validate(plantPatternvalidation.getPlantPattern),
-
-    plantPatternController.getPlantPattern
-  )
-  .delete(
-    // auth(),
-    validate(plantPatternvalidation.deletePlantPattern),
-
-    plantPatternController.deletePlantPattern
-  );
+  .get(auth(), validate(plantPatternvalidation.getPlantPattern), plantPatternController.getPlantPattern)
+  .delete(auth(), validate(plantPatternvalidation.deletePlantPattern), plantPatternController.deletePlantPattern);
 
 export default router;

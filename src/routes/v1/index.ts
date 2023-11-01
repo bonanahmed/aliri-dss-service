@@ -10,6 +10,7 @@ import plantPattern from './plant-pattern.route';
 import plantPatternTemplate from './plant-pattern-template.route';
 import groupRoute from './group.route';
 import dashboardRoute from './dashboard.route';
+import accountRoute from './account.route';
 // import docsRoute from "./docs.route";
 // import config from "../../config/config";
 
@@ -59,6 +60,10 @@ const defaultRoutes = [
   {
     path: '/dashboard',
     route: dashboardRoute,
+  },
+  {
+    path: '/account',
+    route: accountRoute,
   },
 ];
 

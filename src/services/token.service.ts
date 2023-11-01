@@ -87,8 +87,8 @@ const generateAuthTokens = async (account: IAccountDocument): Promise<any> => {
   const accessToken = generateToken(account.id, accessTokenExpires, tokenTypes.ACCESS);
 
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(account.id, refreshTokenExpires, tokenTypes.REFRESH);
-  await saveToken(refreshToken, account.id, refreshTokenExpires, tokenTypes.REFRESH);
+  const refreshToken = generateToken(account._id, refreshTokenExpires, tokenTypes.REFRESH);
+  await saveToken(refreshToken, account._id, refreshTokenExpires, tokenTypes.REFRESH);
 
   return {
     access: {

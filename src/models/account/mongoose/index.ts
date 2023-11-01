@@ -11,7 +11,11 @@ export interface IAccount extends IDefaultData {
   username: string;
   email?: string;
   password: string;
+  mobile_phone_number?: string;
   role: string;
+  name: string;
+  status: boolean;
+  profile_pic: string;
 }
 
 export interface IAccountDocument extends IAccount, Document {
@@ -52,6 +56,29 @@ const accountSchema = new Schema<IAccount>({
     type: String,
     // enum: roles,
     default: 'user',
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  mobile_phone_number: {
+    type: String,
+    required: false,
+    validate(value: string) {
+      const phoneNumberRegex = /^\+\d{1,3}\d{3,14}$/;
+      // Test if the input value matches the phone number regex pattern
+      if (!phoneNumberRegex.test(value)) {
+        throw new Error('Invalid phone number format, must contain +');
+      }
+    },
+  },
+  status: {
+    type: Boolean,
+    required: true,
+  },
+  profile_pic: {
+    type: String,
+    required: false,
   },
 
   ...DefaultData,

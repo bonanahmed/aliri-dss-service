@@ -37,19 +37,27 @@ const registerAccount = async (accountBody: any): Promise<any> => {
 
 /**
  * Logout
- * @param {string} refreshToken
+ * @param {string} account_id
  * @returns {Promise}
  */
-const logout = async (refreshToken: string): Promise<void> => {
-  const refreshTokenDoc = await Token.findOne({
-    token: refreshToken,
+const logout = async (account_id: string): Promise<void> => {
+  // const refreshTokenDoc = await Token.findOne({
+  //   token: refreshToken,
+  //   type: tokenTypes.REFRESH,
+  //   blacklisted: false,
+  // });
+  // if (!refreshTokenDoc) {
+  //   throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+  // }
+  // await refreshTokenDoc.deleteOne({ token: refreshTokenDoc.token });
+  const refreshTokenDoc = await Token.deleteMany({
+    account_id: account_id,
     type: tokenTypes.REFRESH,
     blacklisted: false,
   });
   if (!refreshTokenDoc) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
   }
-  await refreshTokenDoc.deleteOne({ token: refreshTokenDoc.token });
 };
 
 /**

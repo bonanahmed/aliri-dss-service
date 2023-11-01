@@ -9,3 +9,4 @@ export * as plantPatternController from './plant-pattern.controller';
 export * as plantPatternTemplateController from './plant-pattern-template.controller';
 export * as groupController from './group.controller';
 export * as dashboardController from './dashboard.controller';
+export * as accountController from './account.controller';

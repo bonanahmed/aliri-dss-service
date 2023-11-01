@@ -4,10 +4,13 @@ import { password } from './custom.validation';
 const register = {
   body: Joi.object().keys({
     username: Joi.string().required(),
-    email: Joi.string().email(),
+    email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    full_name: Joi.string().required(),
+    name: Joi.string().required(),
+    profile_pic: Joi.string(),
     role: Joi.string().required(),
+    mobile_phone_number: Joi.string().required(),
+    status: Joi.boolean().required(),
   }),
 };
 
@@ -19,9 +22,7 @@ const login = {
 };
 
 const logout = {
-  body: Joi.object().keys({
-    refreshToken: Joi.string().required(),
-  }),
+  body: Joi.object().keys({}),
 };
 
 const refreshTokens = {

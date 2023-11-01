@@ -9,6 +9,9 @@ import routes from './routes/v1';
 import { json, urlencoded } from 'body-parser';
 import { jwtStrategy } from './config/passport';
 import { errorConverter, errorHandler } from './middlewares/error';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import config from './config/config';
 
 const app = express();
 
@@ -20,6 +23,21 @@ app.use(urlencoded({ limit: '10mb', extended: true }));
 
 // sanitize request data
 app.use(mongoSanitize());
+
+//Use Cookies
+app.use(cookieParser());
+app.use(
+  session({
+    secret: config.session.secret,
+    resave: false,
+    saveUninitialized: true,
+    // store: new FileStore(), // or use another store
+    cookie: {
+      maxAge: 86400000,
+      secure: false,
+    },
+  })
+);
 
 // gzip compression
 // app.use(compression());

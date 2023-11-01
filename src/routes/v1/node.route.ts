@@ -9,13 +9,13 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // auth(),
+    auth(),
     validate(nodeValidation.createNode),
 
     nodeController.createNode
   )
   .get(
-    // auth(),
+    auth(),
     validate(nodeValidation.getNodes),
 
     nodeController.getNodes
@@ -24,19 +24,19 @@ router
 router
   .route('/:nodeId')
   .get(
-    // auth(),
+    auth(),
     validate(nodeValidation.getNode),
 
     nodeController.getNode
   )
   .patch(
-    // auth(),
+    auth(),
     validate(nodeValidation.updateNode),
 
     nodeController.updateNode
   )
   .delete(
-    // auth(),
+    auth(),
     validate(nodeValidation.deleteNode),
 
     nodeController.deleteNode

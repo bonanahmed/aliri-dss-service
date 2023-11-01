@@ -2,6 +2,7 @@ import express from 'express';
 import validate from '../../middlewares/validate';
 // import * as plantPatternTemplateValidation from "../../validations/plantPatternTemplate.validation";
 import { plantPatternTemplateController } from '../../controllers';
+import auth from '../../middlewares/auth';
 // import auth from "../../middlewares/auth";
 
 const router = express.Router();
@@ -9,36 +10,31 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // auth('manageTemplates'),
+    auth(),
     // validate(plantPatternTemplateValidation.createPlantPatternTemplate),
-
     plantPatternTemplateController.createPlantPatternTemplate
   )
   .get(
-    // auth('getPlantPatternTemplates'),
+    auth(),
     // validate(plantPatternTemplateValidation.getPlantPatternTemplates),
-
     plantPatternTemplateController.getPlantPatternTemplates
   );
 
 router
   .route('/:plantPatternTemplateId')
   .get(
-    // auth('getPlantPatternTemplates'),
+    auth(),
     // validate(plantPatternTemplateValidation.getPlantPatternTemplate),
-
     plantPatternTemplateController.getPlantPatternTemplate
   )
   .patch(
-    // auth('manageTemplates'),
+    auth(),
     // validate(plantPatternTemplateValidation.updatePlantPatternTemplate),
-
     plantPatternTemplateController.updatePlantPatternTemplate
   )
   .delete(
-    // auth('manageTemplates'),
+    auth(),
     // validate(plantPatternTemplateValidation.deletePlantPatternTemplate),
-
     plantPatternTemplateController.deletePlantPatternTemplate
   );
 

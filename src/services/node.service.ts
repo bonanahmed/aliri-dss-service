@@ -102,7 +102,7 @@ const recursiveFunction: any = async (nodeId: string, hasSekunder: boolean, isNo
       hasSekunder = true;
       if (isNotDone)
         for (const node of nodesByLine) {
-          const nodeData = await recursiveFunction(node.id, hasSekunder, false);
+          const nodeData = await recursiveFunction(node.id, hasSekunder, true);
           promises.push(...nodeData);
         }
     } else {

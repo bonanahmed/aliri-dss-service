@@ -9,13 +9,13 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // auth(),
+    auth(),
     validate(lineValidation.createLine),
 
     lineController.createLine
   )
   .get(
-    // auth(),
+    auth(),
     validate(lineValidation.getLines),
 
     lineController.getLines
@@ -24,19 +24,19 @@ router
 router
   .route('/:lineId')
   .get(
-    // auth(),
+    auth(),
     validate(lineValidation.getLine),
 
     lineController.getLine
   )
   .patch(
-    // auth(),
+    auth(),
     validate(lineValidation.updateLine),
 
     lineController.updateLine
   )
   .delete(
-    // auth(),
+    auth(),
     validate(lineValidation.deleteLine),
 
     lineController.deleteLine

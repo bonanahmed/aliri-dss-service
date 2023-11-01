@@ -9,13 +9,13 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // auth(),
+    auth(),
     validate(areaValidation.createArea),
 
     areaController.createArea
   )
   .get(
-    // auth(),
+    auth(),
     validate(areaValidation.getAreas),
 
     areaController.getAreas
@@ -24,19 +24,19 @@ router
 router
   .route('/:areaId')
   .get(
-    // auth(),
+    auth(),
     validate(areaValidation.getArea),
 
     areaController.getArea
   )
   .patch(
-    // auth(),
+    auth(),
     validate(areaValidation.updateArea),
 
     areaController.updateArea
   )
   .delete(
-    // auth(),
+    auth(),
     validate(areaValidation.deleteArea),
 
     areaController.deleteArea

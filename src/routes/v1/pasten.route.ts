@@ -2,43 +2,38 @@ import express from 'express';
 // import validate from "../../middlewares/validate";
 // import * as pastenValidation from "../../validations/pasten.validation";
 import { pastenController } from '../../controllers';
-// import auth from "../../middlewares/auth";
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
 router
   .route('/')
   .post(
-    // auth('managePastens'),
+    auth(),
     // validate(pastenValidation.createPasten),
-
     pastenController.createPasten
   )
   .get(
-    // auth('getPastens'),
+    auth(),
     // validate(pastenValidation.getPastens),
-
     pastenController.getPastens
   );
 
 router
   .route('/:pastenId')
   .get(
-    // auth('getPastens'),
+    auth(),
     // validate(pastenValidation.getPasten),
-
     pastenController.getPasten
   )
   .patch(
-    // auth('managePastens'),
+    auth(),
     // validate(pastenValidation.updatePasten),
-
     pastenController.updatePasten
   )
   .delete(
-    // auth('managePastens'),
+    auth(),
     // validate(pastenValidation.deletePasten),
-
     pastenController.deletePasten
   );
 
