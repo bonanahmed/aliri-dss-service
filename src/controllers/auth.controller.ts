@@ -23,7 +23,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const { username, password } = req.body;
   const account = await authService.loginWithUsernameAndPassword(username, password);
   const tokens = await tokenService.generateAuthTokens(account);
-  res.cookie('access_token', tokens.access.token, { maxAge: 86400000, httpOnly: true });
+  res.cookie('access_token', tokens.access.token, { maxAge: 86400000, httpOnly: true, domain: '.wsi.digibay.id' });
   ApiResponse(res, httpStatus.OK, 'login success', {
     account,
     tokens,
@@ -35,7 +35,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   // res.status(httpStatus.NO_CONTENT).send();
   const user = req.user as IAccountDocument;
   await authService.logout(user?.id);
-  res.clearCookie('access_token', { httpOnly: true });
+  res.clearCookie('access_token', { httpOnly: true, domain: '.wsi.digibay.id' });
   ApiResponse(res, httpStatus.OK, 'logout success');
 });
 
