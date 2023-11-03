@@ -80,43 +80,62 @@ const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => 
  * @returns {Promise<INodeDocument | null>}
  */
 const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
-  const data: any = await recursiveFunction(nodeId, false, true);
-  const nodeData: any = await Node.findById(nodeId);
-  const uniqueLineNames = [...new Set(data.map((item: any) => item._doc.line_name))];
+  let totalData: any = [];
+  const data1: any = await recursiveFunction(nodeId, false, true, '', false);
+  totalData.push(...data1);
+  const nodeData: any = await Node.findById(nodeId).populate('line_id');
+  const data2 = await nextRecursiveFunction(nodeId, nodeData);
+  totalData.push(...data2);
+  const uniqueLineNames = [...new Set(totalData.map((item: any) => item._doc.line_name))];
   const returnData = uniqueLineNames.map((item: any) => {
     return {
-      [item]: data.filter((filtered: any) => filtered._doc.line_name == item),
+      [item]: totalData.filter((filtered: any) => filtered._doc.line_name == item),
       titik_bangunan: nodeData.name,
+      kode_titik_bangunan: nodeData.code,
     };
   });
   return returnData;
 };
-const recursiveFunction: any = async (nodeId: string, hasSekunder: boolean, isNotDone: boolean) => {
+const recursiveFunction: any = async (
+  nodeId: string,
+  hasSekunder: boolean,
+  isNotDone: boolean,
+  lineParentData: any,
+  isNext: boolean
+) => {
   const promises = [];
   const linesByNodeId: any = await getLinesByNode(nodeId);
-
   for (const line of linesByNodeId) {
+    if (Object.keys(lineParentData).length === 0) {
+      lineParentData = line;
+    } else {
+      if (line.node_id?.id === lineParentData.node_id?.id) lineParentData = line;
+    }
+    // console.log(`${line.name}\t\t\t${lineParentData.name}`);
     const nodesByLine = await getNodesByLine(line.id);
-
     if (nodesByLine.length !== 0) {
       hasSekunder = true;
-      if (isNotDone)
+      if (isNotDone) {
         for (const node of nodesByLine) {
-          const nodeData = await recursiveFunction(node.id, hasSekunder, true);
+          const nodeData = await recursiveFunction(node.id, hasSekunder, true, lineParentData, isNext);
           promises.push(...nodeData);
         }
+      }
     } else {
       let area: any = await Area.findOne({ line_id: line.id }).populate('line_id');
-
       if (hasSekunder) {
-        area._doc.line_name = line.node_id?.line_id?.name;
+        // area._doc.line_name = line.node_id?.line_id?.name;
+        area._doc.line_name = lineParentData.name;
       } else {
-        area._doc.line_name = line?.name;
+        // Ketika Titik Utama Langsung Ke Sawah
+        if (isNext) area._doc.line_name = lineParentData.name;
+        else area._doc.line_name = line?.name;
       }
       area._doc.line_id = {
         id: area._doc.line_id.id,
         name: area._doc.line_id.name,
       };
+
       promises.push(area);
     }
   }
@@ -125,6 +144,19 @@ const recursiveFunction: any = async (nodeId: string, hasSekunder: boolean, isNo
   return data;
 };
 
+const nextRecursiveFunction = async (nodeId: any, parentNodeData: any) => {
+  const promises = [];
+  const nextNode = await Node.findOne({ prev_id: nodeId });
+  if (nextNode) {
+    const nextNodeData = await recursiveFunction(nextNode?._id, false, true, parentNodeData.line_id, true);
+    if (nextNode?.prev_id) {
+      const nextRecursiveData: any = await nextRecursiveFunction(nextNode?._id, parentNodeData);
+      promises.push(...nextRecursiveData);
+    }
+    promises.push(...nextNodeData);
+  }
+  return promises;
+};
 const getLinesByNode = async (node_id: string) => {
   const linesByNodeId = await Line.find({ node_id: node_id });
   return linesByNodeId;
