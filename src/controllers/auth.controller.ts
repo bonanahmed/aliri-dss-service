@@ -26,7 +26,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   res.cookie('access_token', tokens.access.token, {
     maxAge: 86400000,
     httpOnly: true,
-    // domain: '.digibay.id'
+    domain: '.digibay.id',
   });
   ApiResponse(res, httpStatus.OK, 'login success', {
     account,
@@ -41,7 +41,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   await authService.logout(user?.id);
   res.clearCookie('access_token', {
     httpOnly: true,
-    // domain: '.digibay.id'
+    domain: '.digibay.id',
   });
   ApiResponse(res, httpStatus.OK, 'logout success');
 });

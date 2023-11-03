@@ -62,7 +62,7 @@ const defaultRoutes = [
     route: dashboardRoute,
   },
   {
-    path: '/account',
+    path: '/accounts',
     route: accountRoute,
   },
 ];
