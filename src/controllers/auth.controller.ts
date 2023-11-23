@@ -4,6 +4,7 @@ import catchAsync from '../utils/catchAsync';
 import { authService, userService, tokenService, emailService } from '../services';
 import { IAccountDocument } from '../models/account/mongoose';
 import ApiResponse from '../utils/ApiResponse';
+import config from '../config/config';
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
@@ -23,11 +24,12 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const { username, password } = req.body;
   const account = await authService.loginWithUsernameAndPassword(username, password);
   const tokens = await tokenService.generateAuthTokens(account);
-  res.cookie('access_token', tokens.access.token, {
+  const cookiesOption: any = {
     maxAge: 86400000,
     httpOnly: true,
-    domain: '.digibay.id',
-  });
+  };
+  if (config.run_mode === 'production') cookiesOption.domain = '.digibay.id';
+  res.cookie('access_token', tokens.access.token, cookiesOption);
   ApiResponse(res, httpStatus.OK, 'login success', {
     account,
     tokens,
@@ -35,20 +37,18 @@ const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logout = catchAsync(async (req: Request, res: Response) => {
-  // await authService.logout(req.body.refreshToken);
-  // res.status(httpStatus.NO_CONTENT).send();
   const user = req.user as IAccountDocument;
   await authService.logout(user?.id);
-  res.clearCookie('access_token', {
+  const cookiesOption: any = {
     httpOnly: true,
-    domain: '.digibay.id',
-  });
+  };
+  if (config.run_mode === 'production') cookiesOption.domain = '.digibay.id';
+  res.clearCookie('access_token', cookiesOption);
   ApiResponse(res, httpStatus.OK, 'logout success');
 });
 
 const refreshTokens = catchAsync(async (req: Request, res: Response) => {
   const tokens = await authService.refreshAuth(req.body.refreshToken);
-  // res.send({ ...tokens });
   ApiResponse(res, httpStatus.OK, httpStatus[200], {
     tokens,
   });

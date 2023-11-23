@@ -4,6 +4,11 @@ import ApiError from '../utils/ApiError';
 import { INodeDocument } from '../models/node/mongoose';
 import { Line } from '../models/line';
 import { Area } from '../models/area';
+import { PlantPattern } from '../models/plant-pattern';
+import { Pasten } from '../models/pasten';
+import { Group } from '../models/group';
+import { PlantPatternTemplate } from '../models/plant-pattern-template';
+import moment from 'moment';
 
 /**
  * Create a user
@@ -77,7 +82,7 @@ const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => 
 /**
  * Generate papan ekpsploitasi
  * @param {string} nodeId
- * @returns {Promise<INodeDocument | null>}
+ * @returns {Promise<any>}
  */
 const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   let totalData: any = [];
@@ -123,6 +128,8 @@ const recursiveFunction: any = async (
       }
     } else {
       let area: any = await Area.findOne({ line_id: line.id }).populate('line_id');
+      let plant_patterns = await findPlantPattern(area);
+      const areaDetail = await findAreaDetail(plant_patterns);
       if (hasSekunder) {
         // area._doc.line_name = line.node_id?.line_id?.name;
         area._doc.line_name = lineParentData.name;
@@ -135,13 +142,87 @@ const recursiveFunction: any = async (
         id: area._doc.line_id.id,
         name: area._doc.line_id.name,
       };
-
+      area._doc.detail.areaDetail = areaDetail;
+      delete area._doc.detail.group;
       promises.push(area);
     }
   }
 
   const data = await Promise.all(promises);
   return data;
+};
+const findPeriod = (date: any) => {
+  const getCurrentDate = moment(date).format('DD');
+  const getCurrentMonth = moment(date).format('YYYY-MM');
+  const startOfMonth = moment(date, 'YYYY-MM-DD').startOf('month').format('YYYY-MM-DD');
+  const endOfMonth = moment(date, 'YYYY-MM-DD').endOf('month').format('YYYY-MM-DD');
+  let startDate = startOfMonth;
+  let endDate = endOfMonth;
+  if (parseInt(getCurrentDate) <= 15) {
+    endDate = getCurrentMonth + '-15';
+  } else {
+    startDate = getCurrentMonth + '-16';
+  }
+  return {
+    startDate,
+    endDate,
+  };
+};
+
+const findPlantPattern = async (area: any) => {
+  const dateNow = moment(Date.now()).format('YYYY-MM-DD');
+  const { startDate, endDate } = findPeriod(dateNow);
+
+  const plantPatternActual = await PlantPattern.find({ area_id: area.id, date: { $gte: startDate, $lte: endDate } });
+  if (plantPatternActual.length === 0) {
+    const findGroupTemplate = await Group.findById(area.detail.group);
+    const plantPatternPlanningCount = await PlantPatternTemplate.count({
+      plant_pattern_template_name_id: findGroupTemplate?.plant_pattern_template_name_id,
+      date: { $gte: startDate, $lte: endDate },
+    });
+    const plantPatternPlanning = (
+      await PlantPatternTemplate.find({
+        plant_pattern_template_name_id: findGroupTemplate?.plant_pattern_template_name_id,
+        date: { $gte: startDate, $lte: endDate },
+      })
+    ).map((item: any) => {
+      const dataRawArea = area.detail.standard_area / plantPatternPlanningCount;
+      const actualWaterNeeded = dataRawArea * item.pasten;
+      return {
+        code: item.code,
+        color: item.color,
+        date: item.date,
+        growth_time: item.growth_time,
+        pasten: item.pasten,
+        raw_material_area_planted: dataRawArea,
+        actual_water_needed: dataRawArea * item.pasten,
+        water_flow: actualWaterNeeded * 1.25,
+      };
+    });
+    return plantPatternPlanning;
+  }
+
+  return plantPatternActual;
+};
+
+const findAreaDetail = async (plant_patterns: any) => {
+  let areaDetail: any = {};
+  for (const plant_pattern of plant_patterns) {
+    const plant: any = await Pasten.findOne({ code: plant_pattern.code });
+    if (plant?.plant_type) {
+      let detail = {};
+      const rawArea =
+        (areaDetail[plant.plant_type]?.total_area ? areaDetail[plant.plant_type]?.total_area ?? 0 : 0) +
+          plant_pattern.raw_material_area_planted ?? 0;
+      detail = {
+        total_area: isNaN(rawArea) ? 0 : rawArea,
+      };
+
+      areaDetail[plant.plant_type] = detail;
+      if (plant_pattern?.water_flow) areaDetail.waterFlow = plant_pattern.water_flow;
+    }
+  }
+  return areaDetail;
 };
 
 const nextRecursiveFunction = async (nodeId: any, parentNodeData: any) => {
@@ -164,6 +245,11 @@ const getLinesByNode = async (node_id: string) => {
 const getNodesByLine = async (line_id: string) => {
   const nodesByLine = await Node.find({ line_id: line_id });
   return nodesByLine;
+};
+export const getMapNodeData = async (code: string) => {
+  const codeFormat = code.replace(' ', '');
+  const nodeByCode = await Node.findOne({ name: codeFormat.toUpperCase() }).populate('line_id').populate('parent_id');
+  return nodeByCode;
 };
 
 export { createNode, getNodes, getNodeById, updateNodeById, deleteNodeById, generatePapanEksploitasi };

@@ -43,6 +43,7 @@ const accountSchema = new Schema<IAccount>({
   },
   password: {
     type: String,
+    default: 'Password123',
     required: true,
     trim: true,
     minlength: 8,

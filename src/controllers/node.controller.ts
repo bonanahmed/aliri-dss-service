@@ -42,5 +42,9 @@ const generatePapanEksploitasi = catchAsync(async (req, res) => {
   const node = await nodeService.generatePapanEksploitasi(req.params.nodeId);
   ApiResponse(res, httpStatus.OK, 'generate success', node);
 });
+export const getMapNodeData = catchAsync(async (req, res) => {
+  const node = await nodeService.getMapNodeData(req.params.code);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], node);
+});
 
 export { createNode, getNodes, getNode, updateNode, deleteNode, generatePapanEksploitasi };

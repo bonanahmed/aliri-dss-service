@@ -43,5 +43,6 @@ router
   );
 
 router.route('/generate-papan-eksploitasi/:nodeId').get(nodeController.generatePapanEksploitasi);
+router.route('/map/:code').get(nodeController.getMapNodeData);
 
 export default router;

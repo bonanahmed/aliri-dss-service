@@ -53,7 +53,6 @@ const getPlantPatterns = async (filter: any, options: any, date: any): Promise<a
   //   delete filter.line_id;
   // }
   let nodes: any = await Node.paginate(filter, options);
-  let data: Array<any> = [];
   nodes.docs = await Promise.all(
     nodes.docs.map(async (node: any) => {
       const lines: any = await Line.find({

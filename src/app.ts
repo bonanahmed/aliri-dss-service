@@ -12,8 +12,21 @@ import { errorConverter, errorHandler } from './middlewares/error';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import config from './config/config';
+import fileUpload from 'express-fileupload';
+import path from 'path';
 
 const app = express();
+
+// file upload
+app.use(
+  fileUpload({
+    limits: {
+      fileSize: 10000000,
+    },
+    abortOnLimit: true,
+  })
+);
+app.use(express.static(path.join(__dirname, './../public')));
 
 // set security HTTP headers
 app.use(helmet());

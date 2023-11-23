@@ -5,12 +5,17 @@ const createUserAndAccount = {
   body: Joi.object().keys({
     username: Joi.string().required(),
     email: Joi.string().required().email(),
-    password: Joi.string().required().custom(password),
+    // password: Joi.string().required().custom(password),
     name: Joi.string().required(),
     profile_pic: Joi.string(),
     role: Joi.string().required(),
     mobile_phone_number: Joi.string(),
     status: Joi.boolean().required(),
+    // user
+    ktp: Joi.string().required(),
+    gender: Joi.string().required(),
+    blood_type: Joi.string().required(),
+    address: Joi.object().required(),
   }),
 };
 
@@ -37,23 +42,17 @@ const updateUserAndAccount = {
     .keys({
       username: Joi.string().required(),
       email: Joi.string().required().email(),
-      profile_pic: Joi.string(),
+      // password: Joi.string().required().custom(password),
       name: Joi.string().required(),
+      profile_pic: Joi.string(),
       role: Joi.string().required(),
-      mobile_phone_number: Joi.string().required(),
+      mobile_phone_number: Joi.string(),
       status: Joi.boolean().required(),
       // user
-      KTP: Joi.string().required(),
+      ktp: Joi.string().required(),
       gender: Joi.string().required(),
-      religion: Joi.string().required(),
       blood_type: Joi.string().required(),
-      family_status: Joi.string().required(),
-      PTKP: Joi.string().required(),
-      NPWP: Joi.string().required(),
-      BPJS: Joi.string().required(),
-      last_education: Joi.object().required(),
-      address: Joi.object(),
-      career: Joi.object(),
+      address: Joi.object().required(),
     })
     .min(1),
 };
