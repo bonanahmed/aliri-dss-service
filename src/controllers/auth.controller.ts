@@ -28,7 +28,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     maxAge: 86400000,
     httpOnly: true,
   };
-  if (config.run_mode === 'production') cookiesOption.domain = '.digibay.id';
+  if (config.run_mode === 'production') cookiesOption.domain = '.airso.id';
   res.cookie('access_token', tokens.access.token, cookiesOption);
   ApiResponse(res, httpStatus.OK, 'login success', {
     account,
@@ -42,7 +42,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   const cookiesOption: any = {
     httpOnly: true,
   };
-  if (config.run_mode === 'production') cookiesOption.domain = '.digibay.id';
+  if (config.run_mode === 'production') cookiesOption.domain = '.airso.id';
   res.clearCookie('access_token', cookiesOption);
   ApiResponse(res, httpStatus.OK, 'logout success');
 });
