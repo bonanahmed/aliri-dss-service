@@ -1,44 +1,40 @@
-import express from "express";
-import validate from "../../middlewares/validate";
-import * as userValidation from "../../validations/user.validation";
-import { userController } from "../../controllers";
-// import auth from "../../middlewares/auth";
+import express from 'express';
+import { userController } from '../../controllers';
+import auth from '../../middlewares/auth';
+// import validate from '../../middlewares/validate';
+// import * as userValidation from '../../validations/user.validation';
 
 const router = express.Router();
 
 router
-  .route("/")
+  .route('/')
   .post(
-    // auth('manageUsers'),
-    validate(userValidation.createUser),
-
+    auth(),
+    // validate(userValidation.createUser),
     userController.createUser
   )
   .get(
-    // auth('getUsers'),
-    validate(userValidation.getUsers),
-
+    auth(),
+    // validate(userValidation.getUsers),
     userController.getUsers
   );
 
 router
-  .route("/:userId")
+  .route('/:userId')
   .get(
-    // auth('getUsers'),
-    validate(userValidation.getUser),
-
+    auth(),
+    // validate(userValidation.getUser),
     userController.getUser
   )
   .patch(
-    // auth('manageUsers'),
-    validate(userValidation.updateUser),
+    auth(),
+    // validate(userValidation.updateUser),
 
     userController.updateUser
   )
   .delete(
-    // auth('manageUsers'),
-    validate(userValidation.deleteUser),
-
+    auth(),
+    // validate(userValidation.deleteUser),
     userController.deleteUser
   );
 

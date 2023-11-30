@@ -1,9 +1,8 @@
 import express from 'express';
-import validate from '../../middlewares/validate';
-// import * as plantPatternTemplateValidation from "../../validations/plantPatternTemplate.validation";
 import { plantPatternTemplateController } from '../../controllers';
 import auth from '../../middlewares/auth';
-// import auth from "../../middlewares/auth";
+// import validate from '../../middlewares/validate';
+// import * as plantPatternTemplateValidation from "../../validations/plantPatternTemplate.validation";
 
 const router = express.Router();
 

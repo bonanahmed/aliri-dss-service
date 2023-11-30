@@ -9,7 +9,7 @@ import { ILineDocument } from '../models/line/mongoose';
  * @returns {Promise<ILineDocument>}
  */
 const createLine = async (body: any): Promise<ILineDocument> => {
-  return Line.create(body);
+  return await Line.create(body);
 };
 
 /**

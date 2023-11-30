@@ -1,8 +1,8 @@
 import express from 'express';
-import validate from '../../middlewares/validate';
-import * as nodeValidation from '../../validations/node.validation';
 import { nodeController } from '../../controllers';
 import auth from '../../middlewares/auth';
+// import validate from '../../middlewares/validate';
+// import * as nodeValidation from '../../validations/node.validation';
 
 const router = express.Router();
 
@@ -10,13 +10,13 @@ router
   .route('/')
   .post(
     auth(),
-    validate(nodeValidation.createNode),
+    // validate(nodeValidation.createNode),
 
     nodeController.createNode
   )
   .get(
     auth(),
-    validate(nodeValidation.getNodes),
+    // validate(nodeValidation.getNodes),
 
     nodeController.getNodes
   );
@@ -25,19 +25,19 @@ router
   .route('/:nodeId')
   .get(
     auth(),
-    validate(nodeValidation.getNode),
+    // validate(nodeValidation.getNode),
 
     nodeController.getNode
   )
   .patch(
     auth(),
-    validate(nodeValidation.updateNode),
+    // validate(nodeValidation.updateNode),
 
     nodeController.updateNode
   )
   .delete(
     auth(),
-    validate(nodeValidation.deleteNode),
+    // validate(nodeValidation.deleteNode),
 
     nodeController.deleteNode
   );

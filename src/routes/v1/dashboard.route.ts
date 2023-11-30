@@ -1,9 +1,8 @@
 import express from 'express';
-import validate from '../../middlewares/validate';
-import * as templateValidation from '../../validations/template.validation';
 import { dashboardController } from '../../controllers';
 import auth from '../../middlewares/auth';
-// import auth from "../../middlewares/auth";
+// import validate from '../../middlewares/validate';
+// import * as templateValidation from '../../validations/template.validation';
 
 const router = express.Router();
 

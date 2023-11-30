@@ -1,8 +1,8 @@
 import express from 'express';
-// import validate from "../../middlewares/validate";
-// import * as pastenValidation from "../../validations/pasten.validation";
 import { pastenController } from '../../controllers';
 import auth from '../../middlewares/auth';
+// import validate from "../../middlewares/validate";
+// import * as pastenValidation from "../../validations/pasten.validation";
 
 const router = express.Router();
 

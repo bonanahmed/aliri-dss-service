@@ -1,8 +1,8 @@
 import express from 'express';
-// import validate from '../../middlewares/validate';
-// import * as groupValidation from '../../validations/group.validation';
 import { groupController } from '../../controllers';
 import auth from '../../middlewares/auth';
+// import validate from '../../middlewares/validate';
+// import * as groupValidation from '../../validations/group.validation';
 
 const router = express.Router();
 

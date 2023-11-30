@@ -8,6 +8,8 @@ const createLine = {
     hierarchy_code: Joi.string(),
     type: Joi.string().required().valid('primer', 'sekunder', 'tersier'),
     parent_id: Joi.string(),
+    area_id: Joi.string(),
+    images: Joi.array(),
     node_id: Joi.string(),
     detail: Joi.object(),
   }),
@@ -41,6 +43,8 @@ const updateLine = {
       hierarchy_code: Joi.string(),
       type: Joi.string(),
       parent_id: Joi.string(),
+      area_id: Joi.string(),
+      images: Joi.array(),
       node_id: Joi.string(),
       detail: Joi.object(),
     })

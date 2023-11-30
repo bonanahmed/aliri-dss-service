@@ -9,38 +9,13 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(
-    auth(),
-    validate(templateValidation.createTemplate),
-
-    templateController.createTemplate
-  )
-  .get(
-    auth(),
-    validate(templateValidation.getTemplates),
-
-    templateController.getTemplates
-  );
+  .post(auth(), validate(templateValidation.createTemplate), templateController.createTemplate)
+  .get(auth(), validate(templateValidation.getTemplates), templateController.getTemplates);
 
 router
   .route('/:templateId')
-  .get(
-    auth(),
-    validate(templateValidation.getTemplate),
-
-    templateController.getTemplate
-  )
-  .patch(
-    auth(),
-    validate(templateValidation.updateTemplate),
-
-    templateController.updateTemplate
-  )
-  .delete(
-    auth(),
-    validate(templateValidation.deleteTemplate),
-
-    templateController.deleteTemplate
-  );
+  .get(auth(), validate(templateValidation.getTemplate), templateController.getTemplate)
+  .patch(auth(), validate(templateValidation.updateTemplate), templateController.updateTemplate)
+  .delete(auth(), validate(templateValidation.deleteTemplate), templateController.deleteTemplate);
 
 export default router;

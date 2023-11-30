@@ -12,7 +12,9 @@ export interface INode extends IDefaultData {
   parent_id?: mongoose.Schema.Types.ObjectId | null;
   prev_id?: mongoose.Schema.Types.ObjectId | null;
   line_id?: mongoose.Schema.Types.ObjectId | null;
+  area_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
+  images?: any;
 }
 
 export interface INodeDocument extends INode, Document {}
@@ -26,8 +28,10 @@ const nodeSchema = new Schema<INode>({
   type: { type: String, required: true },
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   line_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'lines' },
+  images: { type: Array, required: false },
   detail: { type: Object, required: false },
   prev_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
+  area_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
   ...DefaultData,
 });
 
