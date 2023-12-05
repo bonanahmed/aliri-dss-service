@@ -18,7 +18,6 @@ const userSchema = new Schema<IUser>({
   ktp: { type: String, required: false },
   gender: { type: String, required: true },
   address: { type: Object, required: true },
-  blood_type: { type: String, required: false },
   ...DefaultData,
 });
 

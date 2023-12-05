@@ -13,7 +13,7 @@ import { User } from '../models/user';
  * @returns {Promise<any>}
  */
 const getAccountsAndUsers = async (filter: any, options: any): Promise<any> => {
-  // filter.$and = [{ role: { $ne: 'superadmin' } }];
+  filter.$and = [{ role: { $ne: 'superadmin' } }];
   if (filter.search) {
     filter.$or = [
       { name: { $regex: new RegExp(filter.search, 'i') } },
