@@ -12,6 +12,7 @@ export interface IArea extends IDefaultData {
   parent_id?: mongoose.Schema.Types.ObjectId | null;
   line_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
+  images?: any;
 }
 
 export interface IAreaDocument extends IArea, Document {}
@@ -34,6 +35,8 @@ const areaSchema = new Schema<IArea>({
     kemantren: { type: String, required: false },
     juru: { type: String, required: false },
   },
+  images: { type: Array, required: false },
+
   ...DefaultData,
 });
 

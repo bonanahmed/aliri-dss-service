@@ -12,3 +12,4 @@ export * as plantPatternTemplateService from './plant-pattern-template.service';
 export * as groupService from './group.service';
 export * as dashboardService from './dashboard.service';
 export * as accountService from './account.service';
+export * as cctvService from './cctv.service';
