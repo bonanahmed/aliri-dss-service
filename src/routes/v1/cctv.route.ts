@@ -1,5 +1,5 @@
 import express from 'express';
-import { areaController } from '../../controllers';
+import { cctvController } from '../../controllers';
 import auth from '../../middlewares/auth';
 // import validate from '../../middlewares/validate';
 // import * as areaValidation from '../../validations/area.validation';
@@ -12,7 +12,7 @@ router
   .get(
     auth(),
     // validate(areaValidation.getAreas),
-    areaController.getAreas
+    cctvController.getCCTV
   );
 
 export default router;

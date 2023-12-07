@@ -13,7 +13,6 @@ import { IAccountDocument } from '../models/account/mongoose';
  * @returns {Promise<IAccountDocument>}
  */
 const loginWithUsernameAndPassword = async (username: string, password: string): Promise<IAccountDocument> => {
-  console.log('password', password);
   const account = await Account.findOne({ username: username });
   const passwordIsMatch = await bcrypt.compare(password, account?.password ?? '');
   if (!account || !passwordIsMatch || !password) {

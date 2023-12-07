@@ -58,8 +58,10 @@ app.use(
 // enable cors
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:61646',
   'https://kedung-putri-web.wsi.digibay.id',
   'https://airso.id',
+  '*',
   // Add more origins as needed
 ];
 app.use(

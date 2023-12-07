@@ -7,6 +7,7 @@ import { User } from '../models/user';
 const jwtOptions: StrategyOptions = {
   secretOrKey: config.jwt.secret,
   jwtFromRequest: (req) => {
+    console.log(req.headers.authorization);
     if (req && req.query.token) {
       return req.query.token;
     } else if (req && req.cookies.access_token) {
