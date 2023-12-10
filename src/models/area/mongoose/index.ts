@@ -9,6 +9,7 @@ export interface IArea extends IDefaultData {
   code: string;
   hierarchy_code?: string;
   type: string;
+  link_google_map?: string;
   parent_id?: mongoose.Schema.Types.ObjectId | null;
   line_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
@@ -19,12 +20,12 @@ export interface IAreaDocument extends IArea, Document {}
 
 export interface IAreaModel extends Model<IAreaDocument> {}
 
-const detailObject = { type: Object, required: false };
 const areaSchema = new Schema<IArea>({
   name: { type: String, required: true },
   code: { type: String, required: true },
   hierarchy_code: { type: String, required: false },
   type: { type: String, required: true },
+  link_google_map: { type: String, required: false },
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
   line_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'lines' },
   detail: {

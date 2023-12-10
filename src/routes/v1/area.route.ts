@@ -37,4 +37,6 @@ router
     areaController.deleteArea
   );
 
+router.route('/maps/list').get(areaController.getMaps);
+
 export default router;

@@ -38,4 +38,14 @@ const deleteArea = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, 'delete success', area);
 });
 
+export const getMaps = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'node_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+
+  const result = await areaService.getMaps(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+});
+
 export { createArea, getAreas, getArea, updateArea, deleteArea };
