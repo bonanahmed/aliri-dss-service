@@ -9,6 +9,7 @@ import { Pasten } from '../models/pasten';
 import { Group } from '../models/group';
 import { PlantPatternTemplate } from '../models/plant-pattern-template';
 import moment from 'moment';
+import axios from 'axios';
 
 /**
  * Create a user
@@ -92,14 +93,42 @@ const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   const data2 = await nextRecursiveFunction(nodeId, nodeData);
   totalData.push(...data2);
   const uniqueLineNames = [...new Set(totalData.map((item: any) => item._doc.line_name))];
-  const returnData = uniqueLineNames.map((item: any) => {
+  let returnData: any = {};
+  returnData['papan_digital'] = uniqueLineNames.map((item: any) => {
     return {
       [item]: totalData.filter((filtered: any) => filtered._doc.line_name == item),
       titik_bangunan: nodeData.name,
       kode_titik_bangunan: nodeData.code,
     };
   });
+  returnData['debit_ketersediaan'] = await getDebitKetersediaan();
   return returnData;
+};
+const getDebitKetersediaan = async () => {
+  try {
+    const token = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
+        AccountName: 'ADMINISTRATOR',
+        Password: 'wiratama1791',
+        Timeout: 99999,
+      })
+    ).data.LogInResult.Token;
+    const debitData = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
+        FormulaList: [
+          {
+            Formula: 'B_KP.0.00_DEBIT',
+            Formatted: true,
+          },
+        ],
+        Token: token,
+      })
+    ).data.GetRealTimeValuesResult.ValueList[0].Value;
+
+    return debitData;
+  } catch (error: any) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
 };
 const recursiveFunction: any = async (
   nodeId: string,
@@ -248,7 +277,9 @@ const getNodesByLine = async (line_id: string) => {
 };
 export const getMapNodeData = async (code: string) => {
   const codeFormat = code.replace(' ', '');
-  const nodeByCode = await Node.findOne({ name: codeFormat.toUpperCase() }).populate('line_id').populate('parent_id');
+  const nodeByCode = await Node.findOne({ name: { $regex: new RegExp(codeFormat, 'i') } })
+    .populate('line_id')
+    .populate('parent_id');
   return nodeByCode;
 };
 
