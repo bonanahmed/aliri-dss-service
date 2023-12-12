@@ -1,4 +1,4 @@
-import Area from '../models/area/mongoose';
+import Node from '../models/node/mongoose';
 
 /**
  * Query for users
@@ -17,6 +17,10 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
     ];
     delete filter.search;
   }
-  const areas = options.limit ? await Area.paginate(filter, options) : await Area.find(filter);
+  filter = {
+    ...filter,
+    ['detail.cctv_list']: { $exists: true },
+  };
+  const areas = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return areas;
 };

@@ -102,6 +102,7 @@ const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
     };
   });
   returnData['debit_ketersediaan'] = await getDebitKetersediaan();
+  returnData['realtime'] = await getRealtimeMonitoringDebit();
   return returnData;
 };
 const getDebitKetersediaan = async () => {
@@ -113,19 +114,68 @@ const getDebitKetersediaan = async () => {
         Timeout: 99999,
       })
     ).data.LogInResult.Token;
-    const debitData = (
+    let totalDebit = 0;
+    const dataDebit = (
       await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
         FormulaList: [
+          // {
+          //   Formula: 'B_KP.0.00_DEBIT',
+          //   Formatted: true,
+          // },
           {
-            Formula: 'B_KP.0.00_DEBIT',
+            Formula: 'B_KP.0.00_DEBIT_AVE_5DAY',
+            Formatted: true,
+          },
+          {
+            Formula: 'B_KP.6.1_DEBIT_AVE_5DAY',
             Formatted: true,
           },
         ],
         Token: token,
       })
-    ).data.GetRealTimeValuesResult.ValueList[0].Value;
+    ).data.GetRealTimeValuesResult.ValueList;
 
-    return debitData;
+    dataDebit.forEach((debit: any) => {
+      totalDebit += parseFloat(debit.Value);
+    });
+    return totalDebit.toString();
+  } catch (error: any) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+const getRealtimeMonitoringDebit = async () => {
+  try {
+    const token = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
+        AccountName: 'ADMINISTRATOR',
+        Password: 'wiratama1791',
+        Timeout: 99999,
+      })
+    ).data.LogInResult.Token;
+    let dataReturn: any = {};
+    const dataMonitoring = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
+        FormulaList: [
+          // {
+          //   Formula: 'B_KP.0.00_DEBIT',
+          //   Formatted: true,
+          // },
+          {
+            Formula: 'B_KP.6.1_LEVEL',
+            Formatted: true,
+          },
+          {
+            Formula: 'B_KP.6.1_DEBIT',
+            Formatted: true,
+          },
+        ],
+        Token: token,
+      })
+    ).data.GetRealTimeValuesResult.ValueList;
+    dataMonitoring.forEach((data: any) => {
+      dataReturn[data.Formula] = data.Value;
+    });
+    return dataReturn;
   } catch (error: any) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -145,7 +195,6 @@ const recursiveFunction: any = async (
     } else {
       if (line.node_id?.id === lineParentData.node_id?.id) lineParentData = line;
     }
-    // console.log(`${line.name}\t\t\t${lineParentData.name}`);
     const nodesByLine = await getNodesByLine(line.id);
     if (nodesByLine.length !== 0) {
       hasSekunder = true;
@@ -157,23 +206,25 @@ const recursiveFunction: any = async (
       }
     } else {
       let area: any = await Area.findOne({ line_id: line.id }).populate('line_id');
-      let plant_patterns = await findPlantPattern(area);
-      const areaDetail = await findAreaDetail(plant_patterns);
-      if (hasSekunder) {
-        // area._doc.line_name = line.node_id?.line_id?.name;
-        area._doc.line_name = lineParentData.name;
-      } else {
-        // Ketika Titik Utama Langsung Ke Sawah
-        if (isNext) area._doc.line_name = lineParentData.name;
-        else area._doc.line_name = line?.name;
+      if (area) {
+        let plant_patterns = await findPlantPattern(area);
+        const areaDetail = await findAreaDetail(plant_patterns);
+        if (hasSekunder) {
+          // area._doc.line_name = line.node_id?.line_id?.name;
+          area._doc.line_name = lineParentData.name;
+        } else {
+          // Ketika Titik Utama Langsung Ke Sawah
+          if (isNext) area._doc.line_name = lineParentData.name;
+          else area._doc.line_name = line?.name;
+        }
+        area._doc.line_id = {
+          id: area._doc.line_id.id,
+          name: area._doc.line_id.name,
+        };
+        area._doc.detail.areaDetail = areaDetail;
+        delete area._doc.detail.group;
+        promises.push(area);
       }
-      area._doc.line_id = {
-        id: area._doc.line_id.id,
-        name: area._doc.line_id.name,
-      };
-      area._doc.detail.areaDetail = areaDetail;
-      delete area._doc.detail.group;
-      promises.push(area);
     }
   }
 
@@ -201,7 +252,6 @@ const findPeriod = (date: any) => {
 const findPlantPattern = async (area: any) => {
   const dateNow = moment(Date.now()).format('YYYY-MM-DD');
   const { startDate, endDate } = findPeriod(dateNow);
-
   const plantPatternActual = await PlantPattern.find({ area_id: area.id, date: { $gte: startDate, $lte: endDate } });
   if (plantPatternActual.length === 0) {
     const findGroupTemplate = await Group.findById(area.detail.group);
@@ -224,8 +274,10 @@ const findPlantPattern = async (area: any) => {
         growth_time: item.growth_time,
         pasten: item.pasten,
         raw_material_area_planted: dataRawArea,
+        // actualWaterNeeded: 0,
         actual_water_needed: dataRawArea * item.pasten,
-        water_flow: actualWaterNeeded * 1.25,
+        // water_flow: actualWaterNeeded * 1.25,
+        water_flow: actualWaterNeeded,
       };
     });
     return plantPatternPlanning;
@@ -245,6 +297,7 @@ const findAreaDetail = async (plant_patterns: any) => {
           plant_pattern.raw_material_area_planted ?? 0;
       detail = {
         total_area: isNaN(rawArea) ? 0 : rawArea,
+        pasten: plant.pasten,
       };
 
       areaDetail[plant.plant_type] = detail;
