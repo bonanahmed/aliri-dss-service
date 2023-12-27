@@ -37,6 +37,19 @@ const getNodes = async (filter: any, options: any): Promise<any> => {
     ];
     delete filter.search;
   }
+  options.populate = [
+    { path: 'parent_id', options: { strictPopulate: false } },
+    {
+      path: 'line_id',
+      options: { strictPopulate: false },
+      populate: { path: 'node_id', options: { strictPopulate: false } },
+    },
+    {
+      path: 'prev_id',
+      select: 'name',
+      options: { strictPopulate: false },
+    },
+  ];
   const nodes = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return nodes;
 };
@@ -101,6 +114,7 @@ const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
       kode_titik_bangunan: nodeData.code,
     };
   });
+  returnData['rating_curve_table'] = nodeData.rating_curve_table;
   returnData['debit_ketersediaan'] = await getDebitKetersediaan();
   returnData['realtime'] = await getRealtimeMonitoringDebit();
   return returnData;

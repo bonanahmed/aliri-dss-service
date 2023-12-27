@@ -29,6 +29,14 @@ const getAreas = async (filter: any, options: any): Promise<any> => {
     ];
     delete filter.search;
   }
+  options.populate = [
+    { path: 'parent_id', options: { strictPopulate: false } },
+    {
+      path: 'line_id',
+      options: { strictPopulate: false },
+      populate: { path: 'node_id', options: { strictPopulate: false } },
+    },
+  ];
   const areas = options.limit ? await Area.paginate(filter, options) : await Area.find(filter);
   return areas;
 };

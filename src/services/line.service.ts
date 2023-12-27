@@ -30,6 +30,14 @@ const getLines = async (filter: any, options: any): Promise<any> => {
     filter.type = JSON.parse(filter.type);
   }
 
+  options.populate = [
+    {
+      path: 'node_id',
+      options: { strictPopulate: false },
+      populate: { path: 'line_id', options: { strictPopulate: false } },
+    },
+  ];
+
   const lines = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
   return lines;
 };

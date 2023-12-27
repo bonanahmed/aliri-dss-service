@@ -34,16 +34,16 @@ const lineSchema = new Schema<ILine>({
 
 lineSchema.plugin(mongoosePaginate);
 lineSchema.plugin(toJSON);
-lineSchema.pre('find', function (next) {
-  // Use `populate()` to automatically populate the fields
-  this.populate([
-    {
-      path: 'node_id',
-      options: { strictPopulate: false },
-      populate: { path: 'line_id', options: { strictPopulate: false } },
-    },
-  ]);
-  next();
-});
+// lineSchema.pre('find', function (next) {
+//   // Use `populate()` to automatically populate the fields
+//   this.populate([
+//     {
+//       path: 'node_id',
+//       options: { strictPopulate: false },
+//       populate: { path: 'line_id', options: { strictPopulate: false } },
+//     },
+//   ]);
+//   next();
+// });
 const Line = mongoose.model<ILineDocument, PaginateModel<ILineDocument> & ILineModel>('lines', lineSchema, 'lines');
 export default Line;

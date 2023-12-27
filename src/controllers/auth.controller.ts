@@ -13,7 +13,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
     account_id: account.id,
   });
   const tokens = await tokenService.generateAuthTokens(account);
-  ApiResponse(res, httpStatus.CREATED, 'register success', {
+  ApiResponse(res, httpStatus.CREATED, 'Daftar Berhasil', {
     account,
     user,
     tokens,
@@ -30,7 +30,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   };
   if (config.run_mode === 'production') cookiesOption.domain = '.airso.id';
   res.cookie('access_token', tokens.access.token, cookiesOption);
-  ApiResponse(res, httpStatus.OK, 'login success', {
+  ApiResponse(res, httpStatus.OK, 'Login Berhasil', {
     account,
     tokens,
   });
@@ -44,7 +44,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   };
   if (config.run_mode === 'production') cookiesOption.domain = '.airso.id';
   res.clearCookie('access_token', cookiesOption);
-  ApiResponse(res, httpStatus.OK, 'logout success');
+  ApiResponse(res, httpStatus.OK, 'Logout Berhasil');
 });
 
 const refreshTokens = catchAsync(async (req: Request, res: Response) => {

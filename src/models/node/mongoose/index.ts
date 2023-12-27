@@ -13,8 +13,9 @@ export interface INode extends IDefaultData {
   prev_id?: mongoose.Schema.Types.ObjectId | null;
   line_id?: mongoose.Schema.Types.ObjectId | null;
   area_id?: mongoose.Schema.Types.ObjectId | null;
-  detail: object;
-  images?: any;
+  detail?: object;
+  images?: [];
+  rating_curve_table?: [];
 }
 
 export interface INodeDocument extends INode, Document {}
@@ -29,6 +30,7 @@ const nodeSchema = new Schema<INode>({
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   line_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'lines' },
   images: { type: Array, required: false },
+  rating_curve_table: { type: Array, required: false },
   detail: { type: Object, required: false },
   prev_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
@@ -39,17 +41,17 @@ nodeSchema.plugin(mongoosePaginate);
 // nodeSchema.plugin(paginate);
 nodeSchema.plugin(toJSON);
 
-nodeSchema.pre('find', function (next) {
-  // Use `populate()` to automatically populate the fields
-  this.populate([
-    { path: 'parent_id', options: { strictPopulate: false } },
-    {
-      path: 'line_id',
-      options: { strictPopulate: false },
-      populate: { path: 'node_id', options: { strictPopulate: false } },
-    },
-  ]);
-  next();
-});
+// nodeSchema.pre('find', function (next) {
+//   // Use `populate()` to automatically populate the fields
+//   this.populate([
+//     { path: 'parent_id', options: { strictPopulate: false } },
+//     {
+//       path: 'line_id',
+//       options: { strictPopulate: false },
+//       populate: { path: 'node_id', options: { strictPopulate: false } },
+//     },
+//   ]);
+//   next();
+// });
 const Node = mongoose.model<INodeDocument, PaginateModel<INodeDocument> & INodeModel>('nodes', nodeSchema, 'nodes');
 export default Node;

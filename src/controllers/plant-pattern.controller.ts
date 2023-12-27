@@ -14,7 +14,7 @@ const savePlantPattern = catchAsync(async (req, res) => {
 
 const getPlantPatterns = catchAsync(async (req, res) => {
   const { date } = req.query;
-  const filter = pick(req.query, ['type', 'line_id']);
+  const filter = pick(req.query, ['type', 'line_id', 'group_id']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
   const result = await plantPatternService.getPlantPatterns(filter, options, date);

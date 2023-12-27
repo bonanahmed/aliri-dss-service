@@ -15,7 +15,6 @@ export const getNodes = catchAsync(async (req, res) => {
   const options = {
     ...pick(req.query, ['sortBy', 'limit', 'page']),
   };
-
   const result = await nodeService.getNodes(filter, options);
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
