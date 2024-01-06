@@ -93,11 +93,6 @@ const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => 
   return node;
 };
 
-/**
- * Generate papan ekpsploitasi
- * @param {string} nodeId
- * @returns {Promise<any>}
- */
 const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   let totalData: any = [];
   const data1: any = await recursiveFunction(nodeId, false, true, '', false);
@@ -118,81 +113,6 @@ const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   returnData['debit_ketersediaan'] = await getDebitKetersediaan();
   returnData['realtime'] = await getRealtimeMonitoringDebit();
   return returnData;
-};
-const getDebitKetersediaan = async () => {
-  try {
-    const token = (
-      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
-        AccountName: 'ADMINISTRATOR',
-        Password: 'wiratama1791',
-        Timeout: 99999,
-      })
-    ).data.LogInResult.Token;
-    let totalDebit = 0;
-    const dataDebit = (
-      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
-        FormulaList: [
-          // {
-          //   Formula: 'B_KP.0.00_DEBIT',
-          //   Formatted: true,
-          // },
-          {
-            Formula: 'B_KP.0.00_DEBIT_AVE_5DAY',
-            Formatted: true,
-          },
-          {
-            Formula: 'B_KP.6.1_DEBIT_AVE_5DAY',
-            Formatted: true,
-          },
-        ],
-        Token: token,
-      })
-    ).data.GetRealTimeValuesResult.ValueList;
-
-    dataDebit.forEach((debit: any) => {
-      totalDebit += parseFloat(debit.Value);
-    });
-    return totalDebit.toString();
-  } catch (error: any) {
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
-  }
-};
-const getRealtimeMonitoringDebit = async () => {
-  try {
-    const token = (
-      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
-        AccountName: 'ADMINISTRATOR',
-        Password: 'wiratama1791',
-        Timeout: 99999,
-      })
-    ).data.LogInResult.Token;
-    let dataReturn: any = {};
-    const dataMonitoring = (
-      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
-        FormulaList: [
-          // {
-          //   Formula: 'B_KP.0.00_DEBIT',
-          //   Formatted: true,
-          // },
-          {
-            Formula: 'B_KP.6.1_LEVEL',
-            Formatted: true,
-          },
-          {
-            Formula: 'B_KP.6.1_DEBIT',
-            Formatted: true,
-          },
-        ],
-        Token: token,
-      })
-    ).data.GetRealTimeValuesResult.ValueList;
-    dataMonitoring.forEach((data: any) => {
-      dataReturn[data.Formula] = data.Value;
-    });
-    return dataReturn;
-  } catch (error: any) {
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
-  }
 };
 const recursiveFunction: any = async (
   nodeId: string,
@@ -224,7 +144,6 @@ const recursiveFunction: any = async (
         let plant_patterns = await findPlantPattern(area);
         const areaDetail = await findAreaDetail(plant_patterns);
         if (hasSekunder) {
-          // area._doc.line_name = line.node_id?.line_id?.name;
           area._doc.line_name = lineParentData.name;
         } else {
           // Ketika Titik Utama Langsung Ke Sawah
@@ -335,12 +254,85 @@ const nextRecursiveFunction = async (nodeId: any, parentNodeData: any) => {
   return promises;
 };
 const getLinesByNode = async (node_id: string) => {
-  const linesByNodeId = await Line.find({ node_id: node_id });
+  const linesByNodeId = await Line.find({ node_id: node_id }).populate([
+    {
+      path: 'node_id',
+      options: { strictPopulate: false },
+      populate: { path: 'line_id', options: { strictPopulate: false } },
+    },
+  ]);
   return linesByNodeId;
 };
 const getNodesByLine = async (line_id: string) => {
   const nodesByLine = await Node.find({ line_id: line_id });
   return nodesByLine;
+};
+const getDebitKetersediaan = async () => {
+  try {
+    const token = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
+        AccountName: 'ADMINISTRATOR',
+        Password: 'wiratama1791',
+        Timeout: 99999,
+      })
+    ).data.LogInResult.Token;
+    let totalDebit = 0;
+    const dataDebit = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
+        FormulaList: [
+          {
+            Formula: 'B_KP.0.00_DEBIT_AVE_5DAY',
+            Formatted: true,
+          },
+          {
+            Formula: 'B_KP.6.1_DEBIT_AVE_5DAY',
+            Formatted: true,
+          },
+        ],
+        Token: token,
+      })
+    ).data.GetRealTimeValuesResult.ValueList;
+
+    dataDebit.forEach((debit: any) => {
+      totalDebit += parseFloat(debit.Value);
+    });
+    return totalDebit.toString();
+  } catch (error: any) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+const getRealtimeMonitoringDebit = async () => {
+  try {
+    const token = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/LogIn', {
+        AccountName: 'ADMINISTRATOR',
+        Password: 'wiratama1791',
+        Timeout: 99999,
+      })
+    ).data.LogInResult.Token;
+    let dataReturn: any = {};
+    const dataMonitoring = (
+      await axios.post('http://202.169.239.21:8733/TopkapiService/GetRealTimeValues', {
+        FormulaList: [
+          {
+            Formula: 'B_KP.6.1_LEVEL',
+            Formatted: true,
+          },
+          {
+            Formula: 'B_KP.6.1_DEBIT',
+            Formatted: true,
+          },
+        ],
+        Token: token,
+      })
+    ).data.GetRealTimeValuesResult.ValueList;
+    dataMonitoring.forEach((data: any) => {
+      dataReturn[data.Formula] = data.Value;
+    });
+    return dataReturn;
+  } catch (error: any) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
 };
 export const getMapNodeData = async (code: string) => {
   const codeFormat = code.replace(' ', '');
