@@ -8,7 +8,10 @@ import ApiError from '../utils/ApiError';
 
 const createUserAndAccount = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
-  const account = await authService.registerAccount(body);
+  const account = await authService.registerAccount({
+    ...body,
+    password: 'Password12345678',
+  });
   const user = await userService.createUser({
     account_id: account.id,
     ...body,
