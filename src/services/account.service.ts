@@ -21,9 +21,10 @@ const getAccountsAndUsers = async (filter: any, options: any): Promise<any> => {
     ];
     delete filter.search;
   }
-  let accounts = await Account.paginate(filter, options);
+  let accounts: any = options.limit ? await Account.paginate(filter, options) : await Account.find(filter);
+  const listAccount = options.limit ? accounts.docs : accounts;
   const accountResult = await Promise.all(
-    accounts.docs.map(async (account) => {
+    listAccount.map(async (account: any) => {
       const user = await User.findOne({ account_id: account.id });
       return {
         account,
@@ -32,10 +33,12 @@ const getAccountsAndUsers = async (filter: any, options: any): Promise<any> => {
     })
   );
 
-  const result = {
-    ...accounts,
-    docs: accountResult,
-  };
+  const result = options.limit
+    ? {
+        ...accounts,
+        docs: accountResult,
+      }
+    : accountResult;
 
   return result;
 };

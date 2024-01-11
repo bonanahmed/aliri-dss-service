@@ -13,3 +13,4 @@ export * as groupService from './group.service';
 export * as dashboardService from './dashboard.service';
 export * as accountService from './account.service';
 export * as cctvService from './cctv.service';
+export * as kemantrenService from './kemantren.service';

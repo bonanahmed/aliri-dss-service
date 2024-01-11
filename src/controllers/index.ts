@@ -12,3 +12,4 @@ export * as dashboardController from './dashboard.controller';
 export * as accountController from './account.controller';
 export * as cctvController from './cctv.controller';
 export * as uploadController from './utils/upload.controller';
+export * as kemantrenController from './kemantren.controller';

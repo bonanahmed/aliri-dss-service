@@ -25,7 +25,7 @@ const createUserAndAccount = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getUsersAndAccounts = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search']);
+  const filter = pick(req.query, ['search', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const accounts = await accountService.getAccountsAndUsers(filter, options);
   // res.send(result);

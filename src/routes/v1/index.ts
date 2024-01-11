@@ -12,6 +12,7 @@ import groupRoute from './group.route';
 import dashboardRoute from './dashboard.route';
 import accountRoute from './account.route';
 import cctvRoute from './cctv.route';
+import kemantrenRoute from './kemantren.route';
 import uploadRoute from './utils/upload.route';
 // import docsRoute from "./docs.route";
 // import config from "../../config/config";
@@ -70,6 +71,10 @@ const defaultRoutes = [
   {
     path: '/cctv',
     route: cctvRoute,
+  },
+  {
+    path: '/kemantrens',
+    route: kemantrenRoute,
   },
   {
     path: '/utils/upload',

@@ -31,10 +31,8 @@ const areaSchema = new Schema<IArea>({
   detail: {
     group: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'groups' },
     standard_area: { type: Number, required: false },
-    // kemantren: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
-    // juru: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'accounts' },
-    kemantren: { type: String, required: false },
-    juru: { type: String, required: false },
+    kemantren: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'kemantrens' },
+    juru: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'accounts' },
   },
   images: { type: Array, required: false },
 

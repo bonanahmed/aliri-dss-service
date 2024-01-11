@@ -14,6 +14,7 @@ import { Node } from '../models/node';
  */
 const savePlantPattern = async (body: any, date: string): Promise<any> => {
   const areas = body;
+  console.log(areas);
   await PlantPattern.deleteMany({
     date: { $regex: `^${date}` },
   });
@@ -23,7 +24,7 @@ const savePlantPattern = async (body: any, date: string): Promise<any> => {
       bodyPlantPatternNew.push({
         ...date_plant,
         line_id: area.line_id,
-        area_id: area.id,
+        area_id: area._id,
         id: undefined,
       });
     });
