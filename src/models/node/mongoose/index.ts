@@ -7,6 +7,7 @@ import toJSON from '../../plugins/toJSON.plugin';
 export interface INode extends IDefaultData {
   name: string;
   code: string;
+  hm: number;
   hierarchy_code?: string;
   type: string;
   parent_id?: mongoose.Schema.Types.ObjectId | null;
@@ -26,6 +27,7 @@ export interface INodeModel extends Model<INodeDocument> {}
 const nodeSchema = new Schema<INode>({
   name: { type: String, required: true },
   code: { type: String, required: true },
+  hm: { type: Number, required: true },
   hierarchy_code: { type: String, required: false },
   type: { type: String, required: true },
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },

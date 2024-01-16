@@ -45,3 +45,12 @@ export const getMapNodeData = catchAsync(async (req, res) => {
   const node = await nodeService.getMapNodeData(req.params.code);
   ApiResponse(res, httpStatus.OK, httpStatus[200], node);
 });
+
+export const calculateFlow = catchAsync(async (req, res) => {
+  const node = await nodeService.calculateFlow(req.params.nodeId);
+  ApiResponse(res, httpStatus.OK, 'generate success', node);
+});
+export const convertToHm = catchAsync(async (req, res) => {
+  const node = await nodeService.convertToHm();
+  ApiResponse(res, httpStatus.OK, 'convert success', node);
+});

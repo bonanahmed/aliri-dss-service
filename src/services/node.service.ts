@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { Node } from '../models/node'; // Import the INodeDocument type from your models
 import ApiError from '../utils/ApiError';
-import { INodeDocument } from '../models/node/mongoose';
+import { INodeDocument, INodeModel } from '../models/node/mongoose';
 import { Line } from '../models/line';
 import { Area } from '../models/area';
 import { PlantPattern } from '../models/plant-pattern';
@@ -16,7 +16,7 @@ import axios from 'axios';
  * @param {Object} body
  * @returns {Promise<INodeDocument>}
  */
-const createNode = async (body: any): Promise<INodeDocument> => {
+export const createNode = async (body: any): Promise<INodeDocument> => {
   return await Node.create(body);
 };
 
@@ -29,7 +29,7 @@ const createNode = async (body: any): Promise<INodeDocument> => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<any>}
  */
-const getNodes = async (filter: any, options: any): Promise<any> => {
+export const getNodes = async (filter: any, options: any): Promise<any> => {
   if (filter.search) {
     filter.$or = [
       { code: { $regex: new RegExp(filter.search, 'i') } },
@@ -59,7 +59,7 @@ const getNodes = async (filter: any, options: any): Promise<any> => {
  * @param {string} id
  * @returns {Promise<INodeDocument | null>}
  */
-const getNodeById = async (id: string): Promise<INodeDocument | null> => {
+export const getNodeById = async (id: string): Promise<INodeDocument | null> => {
   return Node.findById(id);
 };
 
@@ -69,7 +69,7 @@ const getNodeById = async (id: string): Promise<INodeDocument | null> => {
  * @param {Object} updateBody
  * @returns {Promise<INodeDocument | null>}
  */
-const updateNodeById = async (nodeId: string, updateBody: any): Promise<INodeDocument | null> => {
+export const updateNodeById = async (nodeId: string, updateBody: any): Promise<INodeDocument | null> => {
   const node = await getNodeById(nodeId);
   if (!node) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Node not found');
@@ -84,7 +84,7 @@ const updateNodeById = async (nodeId: string, updateBody: any): Promise<INodeDoc
  * @param {string} nodeId
  * @returns {Promise<INodeDocument | null>}
  */
-const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => {
+export const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => {
   const node = await getNodeById(nodeId);
   if (!node) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Node not found');
@@ -93,7 +93,7 @@ const deleteNodeById = async (nodeId: string): Promise<INodeDocument | null> => 
   return node;
 };
 
-const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
+export const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   let totalData: any = [];
   const data1: any = await recursiveFunction(nodeId, false, true, '', false);
   totalData.push(...data1);
@@ -342,4 +342,125 @@ export const getMapNodeData = async (code: string) => {
   return nodeByCode;
 };
 
-export { createNode, getNodes, getNodeById, updateNodeById, deleteNodeById, generatePapanEksploitasi };
+export const calculateFlow = async (nodeId: string) => {
+  const node: any | null = await Node.findById(nodeId).select('name code line_id hm').populate('line_id');
+  let returnData = await checkNode(node!, true);
+  const nodes: any = await Node.find({
+    line_id: node.line_id._id,
+    hm: {
+      $gt: node.hm,
+    },
+  })
+    .sort({ hm: -1 })
+    .select('name code line_id hm distance_to_prev')
+    .populate('line_id');
+  for (const nodeData of nodes) {
+    const checkNodeData = await checkNode(nodeData!);
+    // console.log('BEFORE', checkNodeData);
+    if (checkNodeData.line_id.type === 'primer') {
+      const faktor_loses = parseFloat(((nodeData.distance_to_prev ?? 0) / 9232.0).toFixed(4));
+      checkNodeData.total_debit_kebutuhan =
+        (returnData.direction[node.line_id.name]?.debit_kebutuhan ?? 0) +
+        checkNodeData.total_debit_kebutuhan / 0.9 ** faktor_loses;
+    }
+    returnData = {
+      ...returnData,
+      total_luas_area: returnData.total_luas_area + checkNodeData.total_luas_area,
+      direction: {
+        ...returnData.direction,
+        [node.line_id.name]: {
+          debit_kebutuhan: checkNodeData.total_debit_kebutuhan,
+          luas_area: (returnData.direction[node.line_id.name]?.luas_area ?? 0) + checkNodeData.total_luas_area,
+        },
+      },
+    };
+  }
+  returnData.total_debit_kebutuhan = 0;
+  Object.entries(returnData?.direction).forEach((datareturn: any) => {
+    returnData.total_debit_kebutuhan += datareturn[1].debit_kebutuhan;
+  });
+  return returnData;
+};
+
+const checkNode = async (node: any, isPrimary: boolean = false) => {
+  const directionData: any = {};
+  let debit_loses_terakhir = 0;
+  let total_debit_kebutuhan = 0;
+  let total_luas_area = 0;
+  let lastLineData: any;
+  const lines = await Line.find({ node_id: node.id });
+  for (const line of lines) {
+    if (!lastLineData) lastLineData = line;
+    if (line.type === 'sekunder') {
+      const nodesByLineSekunder = await Node.find({ line_id: line.id })
+        .select('name code distance_to_prev')
+        .sort({ hm: -1 });
+      for (const nodeByLineSekunder of nodesByLineSekunder) {
+        const nodeDetail = await checkNode(nodeByLineSekunder);
+        if (lastLineData?.id !== line.id) {
+          debit_loses_terakhir = 0;
+          lastLineData = line;
+        }
+        const directionIsNotEmpty = Object.entries(nodeDetail.direction).length !== 0;
+        // console.log(node.name, node.line_id?.name ?? '', line.name, line.type);
+        const faktor_loses = parseFloat(((nodeByLineSekunder.distance_to_prev ?? 0) / 64067.0).toFixed(4));
+        const debit_dengan_loses = directionIsNotEmpty
+          ? (debit_loses_terakhir + nodeDetail.total_debit_kebutuhan) / 0.3 ** faktor_loses
+          : debit_loses_terakhir;
+        debit_loses_terakhir = debit_dengan_loses;
+        total_luas_area += nodeDetail.total_luas_area;
+        directionData[line.name] = {
+          luas_area: (directionData[line.name]?.luas_area ?? 0) + nodeDetail.total_luas_area,
+          debit_kebutuhan: debit_dengan_loses,
+        };
+        if (directionIsNotEmpty) {
+          total_debit_kebutuhan = 0;
+          Object.entries(directionData).forEach((direct: any) => {
+            total_debit_kebutuhan += direct[1].debit_kebutuhan;
+          });
+        }
+        // console.log({
+        //   titik: nodeByLineSekunder.name,
+        //   direction: nodeDetail.direction,
+        //   'nodeDetail.total_debit_kebutuhan': nodeDetail.total_debit_kebutuhan,
+        //   debit_dengan_loses,
+        //   debit_terakhir,
+        //   total_luas_area,
+        //   directionData,
+        // });
+      }
+    } else {
+      const areaData: any = await Area.findOne({ line_id: line.id });
+      const luas_area = areaData?.detail.standard_area ?? 0;
+      const debit_kebutuhan = luas_area * 1 * 1.25;
+      total_luas_area += luas_area;
+      total_debit_kebutuhan += debit_kebutuhan;
+      directionData[line.name] = {
+        luas_area,
+        debit_kebutuhan,
+      };
+    }
+  }
+  const returnData = {
+    ...node._doc,
+    total_debit_kebutuhan,
+    total_luas_area,
+    direction: directionData,
+  };
+  return returnData;
+};
+
+export const convertToHm = async () => {
+  const nodes = await Node.find({});
+  const promises: any[] = [];
+  for (const node of nodes) {
+    const hm = parseInt(node.code.split('.')[1] + node.code.split('.')[2]);
+    if (!Number.isNaN(hm)) {
+      const updateOne = Node.findByIdAndUpdate(node.id, {
+        hm: hm,
+      });
+      promises.push(updateOne);
+    }
+  }
+  return await Promise.all(promises);
+};

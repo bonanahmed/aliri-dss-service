@@ -43,6 +43,11 @@ router
   );
 
 router.route('/generate-papan-eksploitasi/:nodeId').get(nodeController.generatePapanEksploitasi);
+
 router.route('/map/:code').get(nodeController.getMapNodeData);
+
+router.route('/calculate-flow/:nodeId').get(nodeController.calculateFlow);
+
+router.route('/convert/hm').get(nodeController.convertToHm);
 
 export default router;
