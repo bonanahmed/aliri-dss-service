@@ -139,7 +139,7 @@ const recursiveFunction: any = async (
         }
       }
     } else {
-      let area: any = await Area.findOne({ line_id: line.id }).populate('line_id');
+      let area: any = await Area.findOne({ line_id: line.id }).populate('line_id detail.kemantren detail.juru');
       if (area) {
         let plant_patterns = await findPlantPattern(area);
         const areaDetail = await findAreaDetail(plant_patterns);
