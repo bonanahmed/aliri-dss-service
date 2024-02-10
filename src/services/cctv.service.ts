@@ -1,5 +1,4 @@
 import Node from '../models/node/mongoose';
-import { getCCTVLink } from './hcp.service';
 
 /**
  * Query for users
@@ -23,19 +22,5 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
     ['detail.cctv_list']: { $exists: true },
   };
   const nodes: any = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
-  // if (options.limit) {
-  //   nodes.docs = await Promise.all(
-  //     nodes.docs.map(async (node: any, index: number) => {
-  //       node.detail.cctv_list = await Promise.all(
-  //         node.detail.cctv_list.map(async (cctv: any) => {
-  //           console.log(cctv);
-  //           // if(cctv.)
-  //           const link = await getCCTVLink(cctv.link);
-  //         })
-  //       );
-  //       return node;
-  //     })
-  //   );
-  // }
   return nodes;
 };
