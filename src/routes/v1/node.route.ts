@@ -48,6 +48,18 @@ router.route('/map/:code').get(nodeController.getMapNodeData);
 
 router.route('/calculate-flow/:nodeId').get(nodeController.calculateFlow);
 
-router.route('/convert/hm').get(nodeController.convertToHm);
+router.route('/lines-in-node/:nodeId').get(auth(), nodeController.linesInNode);
+
+router.route('/data-sensor').post(auth(), nodeController.upsertDataNodeSensor);
+
+router.route('/data-sensor/:nodeId').get(nodeController.getDataNodeSensors).delete(auth(), nodeController.deleteNodeSensor);
+
+router.route('/data-sensor/:nodeId/:lineId').get(nodeController.getDataNodeSensor);
+
+router.route('/data-sensor-detail/:sensorId').get(nodeController.getDataNodeSensorDetail);
+
+router.route('/public/list').get(nodeController.getNodes);
+
+// router.route('/convert/hm').get(nodeController.convertToHm);
 
 export default router;

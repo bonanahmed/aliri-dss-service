@@ -65,6 +65,20 @@ const assignPrevNode = async () => {
       return update;
     })
   );
-  console.log(dataNew);
   return dataNew;
+};
+
+export const convertToHm = async () => {
+  const nodes = await Node.find({});
+  const promises: any[] = [];
+  for (const node of nodes) {
+    const hm = parseInt(node.code.split('.')[1] + node.code.split('.')[2]);
+    if (!Number.isNaN(hm)) {
+      const updateOne = Node.findByIdAndUpdate(node.id, {
+        hm: hm,
+      });
+      promises.push(updateOne);
+    }
+  }
+  return await Promise.all(promises);
 };

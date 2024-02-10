@@ -10,6 +10,8 @@ import { Group } from '../models/group';
 import { PlantPatternTemplate } from '../models/plant-pattern-template';
 import moment from 'moment';
 import axios from 'axios';
+import { NodeSensor } from '../models/node-sensor';
+import { getRealtimeValues } from './scada.service';
 
 /**
  * Create a user
@@ -207,15 +209,12 @@ const findPlantPattern = async (area: any) => {
         growth_time: item.growth_time,
         pasten: item.pasten,
         raw_material_area_planted: dataRawArea,
-        // actualWaterNeeded: 0,
         actual_water_needed: dataRawArea * item.pasten,
-        // water_flow: actualWaterNeeded * 1.25,
         water_flow: actualWaterNeeded,
       };
     });
     return plantPatternPlanning;
   }
-
   return plantPatternActual;
 };
 
@@ -342,9 +341,11 @@ export const getMapNodeData = async (code: string) => {
   return nodeByCode;
 };
 
-export const calculateFlow = async (nodeId: string) => {
-  const node: any | null = await Node.findById(nodeId).select('name code line_id hm').populate('line_id');
-  let returnData = await checkNode(node!, true);
+export const calculateFlow = async (nodeId: string, date: string) => {
+  const node: any | null = await Node.findById(nodeId)
+    .select('name code line_id hm distance_to_prev rating_curve_table area_id')
+    .populate('line_id');
+  let returnData = await checkNode(node!, date);
   const nodes: any = await Node.find({
     line_id: node.line_id._id,
     hm: {
@@ -352,25 +353,50 @@ export const calculateFlow = async (nodeId: string) => {
     },
   })
     .sort({ hm: -1 })
-    .select('name code line_id hm distance_to_prev')
-    .populate('line_id');
+    .select('name code line_id hm distance_to_prev prev_id')
+    .populate('line_id line_id.detail.juru');
   for (const nodeData of nodes) {
-    const checkNodeData = await checkNode(nodeData!);
-    // console.log('BEFORE', checkNodeData);
+    const checkNodeData = await checkNode(nodeData!, date);
+    let panjangSaluran = 0;
+    let faktorDistribusi = 0;
     if (checkNodeData.line_id.type === 'primer') {
-      const faktor_loses = parseFloat(((nodeData.distance_to_prev ?? 0) / 9232.0).toFixed(4));
-      checkNodeData.total_debit_kebutuhan =
-        (returnData.direction[node.line_id.name]?.debit_kebutuhan ?? 0) +
-        checkNodeData.total_debit_kebutuhan / 0.9 ** faktor_loses;
+      panjangSaluran = 9232;
+      faktorDistribusi = 0.9;
+    } else if (checkNodeData.line_id.type === 'sekunder') {
+      panjangSaluran = 68223;
+      faktorDistribusi = 0.3;
     }
+    const distance_total = nodeData.distance_to_prev ?? 0;
+    const faktor_loses = (distance_total ?? 0) / panjangSaluran;
+    const pangkat_loses = faktorDistribusi ** faktor_loses;
+    const debit_sebelumnya = returnData.direction[node.line_id.name]?.debit_kebutuhan ?? 0;
+    const akumulasi_debit = debit_sebelumnya + checkNodeData.total_debit_kebutuhan;
+    const debit_loses = akumulasi_debit / pangkat_loses;
+    // console.log(checkNodeData.name, faktorDistribusi, panjangSaluran);
+    // console.log('\tpanjang_ruas: ', distance_total);
+    // console.log('\ttotal_luas_area: ', checkNodeData.total_luas_area);
+    // console.log('\tfaktor_loses: ', faktor_loses);
+    // console.log('\tdebit_perintah: ', checkNodeData.total_debit_kebutuhan);
+    // console.log('\tdebit_sebelumnya: ', debit_sebelumnya ?? 'Tidak ada');
+    // console.log('\tdebit_loses: ', debit_loses);
+    // console.log('\tarah: ', checkNodeData.direction);
+    let pola_tanam: any[] = [];
+    Object.values(checkNodeData.direction).forEach((data: any) => {
+      pola_tanam = [...pola_tanam, ...data.pola_tanam];
+    });
+    const lineDetail: any = await Line.findById(node.line_id._id).populate('detail.juru detail.kemantren');
     returnData = {
       ...returnData,
       total_luas_area: returnData.total_luas_area + checkNodeData.total_luas_area,
       direction: {
         ...returnData.direction,
         [node.line_id.name]: {
-          debit_kebutuhan: checkNodeData.total_debit_kebutuhan,
+          line_id: node.line_id._id,
+          juru: lineDetail?.detail?.juru?.name ?? '',
+          kemantren: lineDetail?.detail?.kemantren?.name ?? '',
           luas_area: (returnData.direction[node.line_id.name]?.luas_area ?? 0) + checkNodeData.total_luas_area,
+          debit_kebutuhan: debit_loses,
+          pola_tanam: [...(returnData.direction[node.line_id.name]?.pola_tanam ?? []), ...pola_tanam],
         },
       },
     };
@@ -379,65 +405,101 @@ export const calculateFlow = async (nodeId: string) => {
   Object.entries(returnData?.direction).forEach((datareturn: any) => {
     returnData.total_debit_kebutuhan += datareturn[1].debit_kebutuhan;
   });
+  let panjangSaluran = 0;
+  let faktorDistribusi = 0;
+  if (returnData.line_id.type === 'primer') {
+    panjangSaluran = 9232;
+    faktorDistribusi = 0.9;
+  } else if (returnData.line_id.type === 'sekunder') {
+    panjangSaluran = 68223;
+    faktorDistribusi = 0.3;
+  }
+  const distance_total = node.distance_to_prev ?? 0;
+  const faktor_loses = (distance_total ?? 0) / panjangSaluran;
+  const pangkat_loses = faktorDistribusi ** faktor_loses;
+  const akumulasi_debit = returnData.total_debit_kebutuhan;
+  returnData.total_debit_kebutuhan = akumulasi_debit / pangkat_loses;
+  returnData.rating_curve_table = node.rating_curve_table;
   return returnData;
 };
 
-const checkNode = async (node: any, isPrimary: boolean = false) => {
-  const directionData: any = {};
+const checkNode = async (node: any, date: string) => {
+  const direction: any = {};
   let debit_loses_terakhir = 0;
   let total_debit_kebutuhan = 0;
   let total_luas_area = 0;
   let lastLineData: any;
-  const lines = await Line.find({ node_id: node.id });
+  const lines: any = await Line.find({ node_id: node.id }).populate('detail.juru detail.kemantren');
   for (const line of lines) {
     if (!lastLineData) lastLineData = line;
     if (line.type === 'sekunder') {
       const nodesByLineSekunder = await Node.find({ line_id: line.id })
-        .select('name code distance_to_prev')
+        .select('name code distance_to_prev prev_id')
         .sort({ hm: -1 });
       for (const nodeByLineSekunder of nodesByLineSekunder) {
-        const nodeDetail = await checkNode(nodeByLineSekunder);
+        const nodeDetail = await checkNode(nodeByLineSekunder, date);
         if (lastLineData?.id !== line.id) {
           debit_loses_terakhir = 0;
           lastLineData = line;
         }
-        const directionIsNotEmpty = Object.entries(nodeDetail.direction).length !== 0;
-        // console.log(node.name, node.line_id?.name ?? '', line.name, line.type);
-        const faktor_loses = parseFloat(((nodeByLineSekunder.distance_to_prev ?? 0) / 64067.0).toFixed(4));
-        const debit_dengan_loses = directionIsNotEmpty
-          ? (debit_loses_terakhir + nodeDetail.total_debit_kebutuhan) / 0.3 ** faktor_loses
-          : debit_loses_terakhir;
+        const distance_total = nodeByLineSekunder.distance_to_prev ?? 0;
+        const faktor_loses = (distance_total ?? 0) / 68223.0;
+        const pangkat_loses = 0.3 ** faktor_loses;
+        const akumulasi_debit = debit_loses_terakhir + nodeDetail.total_debit_kebutuhan;
+        const debit_dengan_loses = akumulasi_debit / pangkat_loses;
         debit_loses_terakhir = debit_dengan_loses;
         total_luas_area += nodeDetail.total_luas_area;
-        directionData[line.name] = {
-          luas_area: (directionData[line.name]?.luas_area ?? 0) + nodeDetail.total_luas_area,
+        // if (isPrimary) {
+        //   console.log(nodeByLineSekunder.name);
+        //   console.log('\tpanjang_ruas: ', distance_total);
+        //   console.log('\ttotal_luas_area: ', total_luas_area);
+        //   console.log('\tfaktor_loses: ', faktor_loses);
+        //   console.log('\tdebit_perintah: ', nodeDetail.total_debit_kebutuhan);
+        //   console.log('\tdebit_sebelumnya: ', debit_loses_terakhir ?? 'Tidak ada');
+        //   console.log('\tdebit_loses: ', debit_dengan_loses);
+        //   console.log('\tarah: ', direction);
+        // }
+        let plant_patterns: any = [];
+        const nodePlantPatterns: any[] = Object.values(nodeDetail.direction);
+        for (const nodePlantPattern of nodePlantPatterns) {
+          plant_patterns = [...plant_patterns, ...nodePlantPattern.pola_tanam];
+        }
+        direction[line.name] = {
+          line_id: line.id,
+          juru: line.detail?.juru?.name ?? '',
+          kemantren: line.detail?.kemantren?.name ?? '',
+          luas_area: (direction[line.name]?.luas_area ?? 0) + nodeDetail.total_luas_area,
           debit_kebutuhan: debit_dengan_loses,
+          pola_tanam: [...(direction[line.name]?.pola_tanam ?? []), ...plant_patterns],
         };
-        if (directionIsNotEmpty) {
+        const directionIsExist = Object.entries(direction).length !== 0;
+        if (directionIsExist) {
           total_debit_kebutuhan = 0;
-          Object.entries(directionData).forEach((direct: any) => {
+          Object.entries(direction).forEach((direct: any) => {
             total_debit_kebutuhan += direct[1].debit_kebutuhan;
           });
         }
-        // console.log({
-        //   titik: nodeByLineSekunder.name,
-        //   direction: nodeDetail.direction,
-        //   'nodeDetail.total_debit_kebutuhan': nodeDetail.total_debit_kebutuhan,
-        //   debit_dengan_loses,
-        //   debit_terakhir,
-        //   total_luas_area,
-        //   directionData,
-        // });
       }
     } else {
-      const areaData: any = await Area.findOne({ line_id: line.id });
-      const luas_area = areaData?.detail.standard_area ?? 0;
-      const debit_kebutuhan = luas_area * 1 * 1.25;
+      const area: any = await Area.findOne({ line_id: line.id }).populate('detail.juru detail.kemantren');
+      const plantPatterns: any = area ? await calculatePlantPattern(area, date) : [];
+
+      const luas_area = area?.detail.standard_area ?? 0;
+      // const debit_kebutuhan = luas_area * 1 * 1.25;
+      let debit_kebutuhan = 0;
+      for (const plantPattern of plantPatterns) {
+        debit_kebutuhan += plantPattern.water_flow;
+      }
       total_luas_area += luas_area;
       total_debit_kebutuhan += debit_kebutuhan;
-      directionData[line.name] = {
+      direction[line.name] = {
+        nama_area: area?.name ?? undefined,
+        juru: area?.detail?.juru?.name ?? undefined,
+        kemantren: area?.detail?.kemantren?.name ?? undefined,
+        line_id: line.id,
         luas_area,
         debit_kebutuhan,
+        pola_tanam: plantPatterns,
       };
     }
   }
@@ -445,22 +507,129 @@ const checkNode = async (node: any, isPrimary: boolean = false) => {
     ...node._doc,
     total_debit_kebutuhan,
     total_luas_area,
-    direction: directionData,
+    direction: direction,
   };
   return returnData;
 };
-
-export const convertToHm = async () => {
-  const nodes = await Node.find({});
-  const promises: any[] = [];
-  for (const node of nodes) {
-    const hm = parseInt(node.code.split('.')[1] + node.code.split('.')[2]);
-    if (!Number.isNaN(hm)) {
-      const updateOne = Node.findByIdAndUpdate(node.id, {
-        hm: hm,
-      });
-      promises.push(updateOne);
-    }
+const calculatePlantPattern = async (area: any, date?: any) => {
+  const dateNow = date ? date : moment(Date.now()).format('YYYY-MM-DD');
+  const plantPatternActual = await PlantPattern.find({
+    area_id: area.id,
+    date: dateNow,
+  });
+  if (plantPatternActual.length !== 0) {
+    return plantPatternActual.map((item: any) => {
+      const raw_material_area_planted = item.raw_material_area_planted;
+      const water_flow = raw_material_area_planted * item.pasten * 1.25;
+      return {
+        area: area.name,
+        code: item.code,
+        color: item.color,
+        date: item.date,
+        growth_time: item.growth_time,
+        plant_type: item.plant_type,
+        pasten: item.pasten,
+        raw_material_area_planted: raw_material_area_planted,
+        water_flow: water_flow,
+        type: 'actual',
+      };
+    });
+  } else {
+    const findGroupTemplate = await Group.findById(area.detail.group);
+    const distinctPlantPatternPlanningCount = await PlantPatternTemplate.distinct('code', {
+      plant_pattern_template_name_id: findGroupTemplate?.plant_pattern_template_name_id,
+      date: dateNow,
+    });
+    const plantPatternPlanning = (
+      await PlantPatternTemplate.find({
+        plant_pattern_template_name_id: findGroupTemplate?.plant_pattern_template_name_id,
+        date: dateNow,
+      })
+    ).map((item: any) => {
+      const raw_material_area_planted = area.detail.standard_area / distinctPlantPatternPlanningCount.length;
+      const water_flow = raw_material_area_planted * item.pasten * 1.25;
+      return {
+        area: area.name,
+        code: item.code,
+        color: item.color,
+        date: item.date,
+        growth_time: item.growth_time,
+        plant_type: item.plant_type,
+        pasten: item.pasten,
+        raw_material_area_planted: raw_material_area_planted,
+        water_flow: water_flow,
+        type: 'planning',
+      };
+    });
+    return plantPatternPlanning;
   }
-  return await Promise.all(promises);
+};
+
+const calculateDistance = async (prev_id: any) => {
+  if (prev_id) {
+    let distance_total = 0;
+    const nodeLineExist = await Line.find({ node_id: prev_id });
+    if (nodeLineExist.length === 0) {
+      const node = await Node.findById(prev_id);
+      console.log('\t' + node?.name);
+      distance_total += node?.distance_to_prev ?? 0;
+      if (node?.prev_id) {
+        distance_total += await calculateDistance(node?.prev_id);
+      }
+    }
+
+    return distance_total;
+  }
+  return 0;
+};
+
+export const linesInNode = async (nodeId: string) => {
+  const node = await Node.findById(nodeId);
+  const lines: any = await Line.find({
+    $or: [
+      { _id: node?.line_id }, // Assuming line_id is the ID of the Line document
+      { node_id: nodeId },
+    ],
+  });
+  return lines;
+};
+
+export const upsertDataNodeSensor = async (data: any) => {
+  const sensor = await NodeSensor.findOneAndUpdate(
+    { node_id: data.node_id, direction_line: data.direction_line, sensor_type: data.sensor_type },
+    {
+      ...data,
+    },
+    { upsert: true, new: true, runValidators: true }
+  );
+  return sensor;
+};
+
+export const getDataNodeSensors = async (nodeId: string) => {
+  const sensors = await NodeSensor.find({ node_id: nodeId }).populate('direction_line');
+  return sensors;
+};
+
+export const getDataNodeSensor = async (nodeId: string, lineId: string, filter: any) => {
+  let sensorFind = await NodeSensor.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
+    'direction_line'
+  );
+  if (sensorFind?.sensor_code) {
+    const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
+    await NodeSensor.findByIdAndUpdate(sensorFind.id, {
+      sensor_value: sensorData,
+    });
+  }
+  const sensor = await NodeSensor.findById(sensorFind?.id);
+  return sensor;
+};
+
+export const getDataNodeSensorDetail = async (sensorId: string) => {
+  const sensor = await NodeSensor.findById(sensorId);
+  return sensor;
+};
+
+export const deleteNodeSensor = async (id: string) => {
+  const sensor = await NodeSensor.findByIdAndDelete(id);
+  return sensor;
 };

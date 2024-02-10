@@ -9,6 +9,7 @@ export interface IPlantPatternTemplate extends IDefaultData {
   color: string;
   date: string;
   growth_time: string;
+  plant_type: string;
   pasten: number;
   actual_water_needed?: number;
   raw_material_area_planted?: number;
@@ -25,6 +26,7 @@ const plantPatternTemplatechema = new Schema<IPlantPatternTemplate>({
   color: { type: String, required: true },
   date: { type: String, required: true },
   growth_time: { type: String, required: true },
+  plant_type: { type: String, required: true },
   pasten: { type: Number, required: true },
   raw_material_area_planted: { type: Number, required: false },
   actual_water_needed: { type: Number, required: false },

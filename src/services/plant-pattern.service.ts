@@ -14,7 +14,6 @@ import { Node } from '../models/node';
  */
 const savePlantPattern = async (body: any, date: string): Promise<any> => {
   const areas = body;
-  console.log(areas);
   await PlantPattern.deleteMany({
     date: { $regex: `^${date}` },
   });

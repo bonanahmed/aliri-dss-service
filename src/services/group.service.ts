@@ -38,7 +38,6 @@ const getGroupsWithPlantPattern = async (filter: any, options: any): Promise<any
   const groups = await Group.find(filter);
   const dataReturns = await Promise.all(
     groups.map(async (group: any, index) => {
-      // console.log(group);
       const plantPattern = await PlantPatternTemplate.find({
         plant_pattern_template_name_id: group.plant_pattern_template_name_id?._id,
       });

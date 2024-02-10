@@ -39,4 +39,12 @@ router
 
 router.route('/maps/list').get(areaController.getMaps);
 
+router.route('/data-sensor/:areaId').get(areaController.getAreaSensor);
+
+router.route('/data-sensor/:areaId/list').get(areaController.getAreaSensors);
+
+router.route('/data-sensor/:sensorId/detail').get(areaController.getAreaSensorDetail);
+
+router.route('/data-sensor').post(areaController.upsertDataAreaSensor);
+
 export default router;

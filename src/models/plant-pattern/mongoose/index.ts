@@ -9,10 +9,11 @@ export interface IPlantPattern extends IDefaultData {
   color: string;
   date: string;
   growth_time: string;
+  plant_type: string;
   pasten: number;
-  actual_water_needed: number;
+  // actual_water_needed: number;
   raw_material_area_planted: number;
-  water_flow?: number;
+  // water_flow?: number;
   area_id: mongoose.Schema.Types.ObjectId;
 }
 
@@ -25,10 +26,11 @@ const patternSchema = new Schema<IPlantPattern>({
   color: { type: String, required: true },
   date: { type: String, required: true },
   growth_time: { type: String, required: true },
+  plant_type: { type: String, required: true },
   pasten: { type: Number, required: true },
   raw_material_area_planted: { type: Number, required: false },
-  actual_water_needed: { type: Number, required: false },
-  water_flow: { type: Number, required: false },
+  // actual_water_needed: { type: Number, required: false },
+  // water_flow: { type: Number, required: false },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'areas' },
 
   ...DefaultData,

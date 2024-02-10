@@ -28,7 +28,10 @@ const lineSchema = new Schema<ILine>({
   type: { type: String, required: true },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
   node_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
-  detail: { type: Object, required: false },
+  detail: {
+    kemantren: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'kemantrens' },
+    juru: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'accounts' },
+  },
   ...DefaultData,
 });
 

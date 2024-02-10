@@ -23,7 +23,10 @@ const createLine = async (body: any): Promise<ILineDocument> => {
  */
 const getLines = async (filter: any, options: any): Promise<any> => {
   if (filter.search) {
-    filter.$or = [{ code: { $regex: new RegExp(filter.search, 'i') } }];
+    filter.$or = [
+      { code: { $regex: new RegExp(filter.search, 'i') } },
+      { name: { $regex: new RegExp(filter.search, 'i') } },
+    ];
     delete filter.search;
   }
   if (filter.type == '{"$ne":"tersier"}') {

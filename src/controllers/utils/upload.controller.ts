@@ -36,7 +36,6 @@ export const upload = catchAsync(async (req, res) => {
   if (Array.isArray(documents)) {
     documentFiles = documents.map((item, index) => {
       const dir = `${rootDir}/${item.name}`.replace(/\\/g, '/');
-      console.log(item);
       item.mv(dir);
       const url = `${completeUrl}/${savePath}/${item.name}`;
       // const url = dir;

@@ -16,6 +16,7 @@ export interface INode extends IDefaultData {
   line_id?: mongoose.Schema.Types.ObjectId | null;
   area_id?: mongoose.Schema.Types.ObjectId | null;
   detail?: object;
+  location?: object;
   images?: [];
   rating_curve_table?: [];
 }
@@ -35,6 +36,7 @@ const nodeSchema = new Schema<INode>({
   images: { type: Array, required: false },
   rating_curve_table: { type: Array, required: false },
   detail: { type: Object, required: false },
+  location: { type: Object, required: false },
   prev_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
   distance_to_prev: { type: Number, required: false },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },

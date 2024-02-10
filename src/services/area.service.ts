@@ -2,14 +2,16 @@ import httpStatus from 'http-status';
 import { Area } from '../models/area'; // Import the IAreaDocument type from your models
 import ApiError from '../utils/ApiError';
 import { IAreaDocument } from '../models/area/mongoose';
+import AreaSensor from '../models/area-sensor/mongoose';
+import { getRealtimeValues } from './scada.service';
 
 /**
  * Create a user
  * @param {Object} body
  * @returns {Promise<IAreaDocument>}
  */
-const createArea = async (body: any): Promise<IAreaDocument> => {
-  return Area.create(body);
+export const createArea = async (body: any): Promise<IAreaDocument> => {
+  return await Area.create(body);
 };
 
 /**
@@ -21,7 +23,7 @@ const createArea = async (body: any): Promise<IAreaDocument> => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<any>}
  */
-const getAreas = async (filter: any, options: any): Promise<any> => {
+export const getAreas = async (filter: any, options: any): Promise<any> => {
   if (filter.search) {
     filter.$or = [
       { name: { $regex: new RegExp(filter.search, 'i') } },
@@ -46,8 +48,8 @@ const getAreas = async (filter: any, options: any): Promise<any> => {
  * @param {string} id
  * @returns {Promise<IAreaDocument | null>}
  */
-const getAreaById = async (id: string): Promise<IAreaDocument | null> => {
-  return Area.findById(id);
+export const getAreaById = async (id: string): Promise<IAreaDocument | null> => {
+  return await Area.findById(id);
 };
 
 /**
@@ -56,7 +58,7 @@ const getAreaById = async (id: string): Promise<IAreaDocument | null> => {
  * @param {Object} updateBody
  * @returns {Promise<IAreaDocument | null>}
  */
-const updateAreaById = async (areaId: string, updateBody: any): Promise<IAreaDocument | null> => {
+export const updateAreaById = async (areaId: string, updateBody: any): Promise<IAreaDocument | null> => {
   const area = await getAreaById(areaId);
   if (!area) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
@@ -71,7 +73,7 @@ const updateAreaById = async (areaId: string, updateBody: any): Promise<IAreaDoc
  * @param {string} areaId
  * @returns {Promise<IAreaDocument | null>}
  */
-const deleteAreaById = async (areaId: string): Promise<IAreaDocument | null> => {
+export const deleteAreaById = async (areaId: string): Promise<IAreaDocument | null> => {
   const area = await getAreaById(areaId);
   if (!area) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
@@ -106,4 +108,58 @@ export const getMaps = async (filter: any, options: any): Promise<any> => {
   return maps;
 };
 
-export { createArea, getAreas, getAreaById, updateAreaById, deleteAreaById };
+/**
+ * Get Area Sensor by areaId
+ * @param {any} data
+ * @returns {Promise<any>}
+ */
+export const upsertDataAreaSensor = async (data: any): Promise<any> => {
+  const sensor = await AreaSensor.findOneAndUpdate(
+    { area_id: data.area_id, sensor_type: data.sensor_type },
+    {
+      ...data,
+    },
+    { upsert: true, new: true, runValidators: true }
+  );
+  return sensor;
+};
+
+/**
+ * Get Area Sensor by areaId
+ * @param {string} areaId
+ * @returns {Promise<any>}
+ */
+export const getAreaSensor = async (areaId: string, filter: any): Promise<any> => {
+  const areaSensor = await AreaSensor.findOne({ area_id: areaId, ...filter });
+  if (!areaSensor) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Area Sensor not found');
+  }
+  if (areaSensor?.sensor_code) {
+    const sensorData = (await getRealtimeValues([areaSensor?.sensor_code]))[0].Value;
+    await AreaSensor.findByIdAndUpdate(areaSensor.id, {
+      sensor_value: sensorData,
+    });
+  }
+  const sensor = await AreaSensor.findById(areaSensor?.id);
+  return sensor;
+};
+
+/**
+ * Get Area Sensor List by areaId
+ * @param {string} areaId
+ * @returns {Promise<any>}
+ */
+export const getAreaSensors = async (areaId: string, filter: any): Promise<any> => {
+  const areaSensor = await AreaSensor.find({ area_id: areaId, ...filter });
+  return areaSensor;
+};
+
+/**
+ * Get Area Sensor Detail by sensorId
+ * @param {string} sensorId
+ * @returns {Promise<any>}
+ */
+export const getAreaSensorDetail = async (sensorId: string): Promise<any> => {
+  const sensor = await AreaSensor.findById(sensorId);
+  return sensor;
+};

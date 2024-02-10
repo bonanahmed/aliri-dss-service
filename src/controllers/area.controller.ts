@@ -5,12 +5,12 @@ import catchAsync from '../utils/catchAsync';
 import { areaService } from '../services';
 import ApiResponse from '../utils/ApiResponse';
 
-const createArea = catchAsync(async (req, res) => {
+export const createArea = catchAsync(async (req, res) => {
   const area = await areaService.createArea(req.body);
   ApiResponse(res, httpStatus.CREATED, 'create success', area);
 });
 
-const getAreas = catchAsync(async (req, res) => {
+export const getAreas = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['search', 'type', 'parent_id']);
   const options = {
     ...pick(req.query, ['sortBy', 'limit', 'page']),
@@ -20,7 +20,7 @@ const getAreas = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
 
-const getArea = catchAsync(async (req, res) => {
+export const getArea = catchAsync(async (req, res) => {
   const area = await areaService.getAreaById(req.params.areaId);
   if (!area) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
@@ -28,12 +28,12 @@ const getArea = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], area);
 });
 
-const updateArea = catchAsync(async (req, res) => {
+export const updateArea = catchAsync(async (req, res) => {
   const area = await areaService.updateAreaById(req.params.areaId, req.body);
   ApiResponse(res, httpStatus.OK, 'update success', area);
 });
 
-const deleteArea = catchAsync(async (req, res) => {
+export const deleteArea = catchAsync(async (req, res) => {
   const area = await areaService.deleteAreaById(req.params.areaId);
   ApiResponse(res, httpStatus.OK, 'delete success', area);
 });
@@ -48,4 +48,25 @@ export const getMaps = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
 
-export { createArea, getAreas, getArea, updateArea, deleteArea };
+export const upsertDataAreaSensor = catchAsync(async (req, res) => {
+  const body = req.body;
+  const sensor = await areaService.upsertDataAreaSensor(body);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const getAreaSensor = catchAsync(async (req, res) => {
+  const query = req.query;
+  const sensor = await areaService.getAreaSensor(req.params.areaId, query);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const getAreaSensors = catchAsync(async (req, res) => {
+  const query = req.query;
+  const sensor = await areaService.getAreaSensors(req.params.areaId, query);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const getAreaSensorDetail = catchAsync(async (req, res) => {
+  const sensor = await areaService.getAreaSensorDetail(req.params.sensorId);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});

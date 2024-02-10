@@ -47,10 +47,44 @@ export const getMapNodeData = catchAsync(async (req, res) => {
 });
 
 export const calculateFlow = catchAsync(async (req, res) => {
-  const node = await nodeService.calculateFlow(req.params.nodeId);
+  const { date } = req.query;
+  const node = await nodeService.calculateFlow(req.params.nodeId, date as string);
   ApiResponse(res, httpStatus.OK, 'generate success', node);
 });
-export const convertToHm = catchAsync(async (req, res) => {
-  const node = await nodeService.convertToHm();
-  ApiResponse(res, httpStatus.OK, 'convert success', node);
+
+export const linesInNode = catchAsync(async (req, res) => {
+  const node = await nodeService.linesInNode(req.params.nodeId);
+  ApiResponse(res, httpStatus.OK, 'find line by node success', node);
 });
+
+// SENSOR
+export const upsertDataNodeSensor = catchAsync(async (req, res) => {
+  const body = req.body;
+  const node = await nodeService.upsertDataNodeSensor(body);
+  ApiResponse(res, httpStatus.OK, 'Tambah Data Berhasil', node);
+});
+
+export const getDataNodeSensors = catchAsync(async (req, res) => {
+  const sensors = await nodeService.getDataNodeSensors(req.params.nodeId);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensors);
+});
+
+export const getDataNodeSensor = catchAsync(async (req, res) => {
+  const query = req.query;
+  const sensor = await nodeService.getDataNodeSensor(req.params.nodeId, req.params.lineId, query);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const getDataNodeSensorDetail = catchAsync(async (req, res) => {
+  const sensor = await nodeService.getDataNodeSensorDetail(req.params.sensorId);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const deleteNodeSensor = catchAsync(async (req, res) => {
+  const sensor = await nodeService.deleteNodeSensor(req.params.nodeId);
+  ApiResponse(res, httpStatus.OK, 'delete success', sensor);
+});
+// export const convertToHm = catchAsync(async (req, res) => {
+//   const node = await nodeService.convertToHm();
+//   ApiResponse(res, httpStatus.OK, 'convert success', node);
+// });

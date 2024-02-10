@@ -100,6 +100,7 @@ const updatePlantPatternTemplateById = async (plantPatternTemplateId: string, bo
       date: item.date,
       growth_time: item.growth_time,
       pasten: item.pasten,
+      plant_type: item.plant_type,
       created_at: item.created_at,
       updated_at: item.updated_at,
       id: undefined,
