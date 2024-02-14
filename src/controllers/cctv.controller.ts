@@ -14,3 +14,9 @@ export const getCCTV = catchAsync(async (req, res) => {
   const result = await cctvService.getCCTV(filter, options);
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
+
+export const generateLinkHikVision = catchAsync(async (req, res) => {
+  const body = req.body;
+  const result = await cctvService.generateLinkHikVision(body);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+});

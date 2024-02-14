@@ -6,4 +6,6 @@ const router = express.Router();
 
 router.route('/').get(auth(), cctvController.getCCTV);
 
+router.route('/generate-link-hikvision').post(auth(), cctvController.generateLinkHikVision);
+
 export default router;

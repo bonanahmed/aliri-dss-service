@@ -1,4 +1,8 @@
 import Node from '../models/node/mongoose';
+import axios from 'axios';
+import httpStatus from 'http-status';
+import https from 'https';
+import ApiError from '../utils/ApiError';
 
 /**
  * Query for users
@@ -23,4 +27,50 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
   };
   const nodes: any = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return nodes;
+};
+
+export const generateLinkHikVision = async (cctv: any) => {
+  try {
+    if (cctv.type === 'hikvision') {
+      const link = cctv.link.split('?')[0];
+      const query = cctv.link.split('?')[1];
+      const header = query.split('&')[0].split('header=')[1];
+      const data = query.split('&')[1].split('body=')[1];
+      let headers: any = {
+        'x-ca-signature-headers': 'x-ca-key,x-ca-nonce,x-ca-timestamp',
+        Accept: 'application/json',
+        ContentType: 'application/json;charset=UTF-8',
+      };
+      header.split(',').forEach((item: any) => {
+        let key = item.split(':')[0];
+        let value = item.split(':')[1];
+        headers[key] = value;
+      });
+      let body: any = {
+        streamType: 0,
+        protocol: 'hls',
+        transmode: 1,
+        requestWebsocketProtocol: 0,
+      };
+      data.split(',').forEach((item: any) => {
+        let key = item.split(':')[0];
+        let value = item.split(':')[1];
+        body[key] = value;
+      });
+      const agent = new https.Agent({
+        rejectUnauthorized: false, // Ignore SSL certificate errors
+      });
+      const response = await axios.post(`${link}`, body, {
+        headers: headers,
+        httpsAgent: agent,
+      });
+      if (response.status === 200) {
+        if (response.data.code === '0') return response.data.data.url;
+      }
+    }
+    return cctv.link;
+  } catch (error: any) {
+    console.log(error);
+    throw new ApiError(httpStatus.NOT_FOUND, error.toString());
+  }
 };
