@@ -495,6 +495,7 @@ const checkNode = async (node: any, date: string) => {
       direction[line.name] = {
         nama_area: area?.name ?? undefined,
         juru: area?.detail?.juru?.name ?? undefined,
+        juru_phone: area?.detail?.juru?.mobile_phone_number ?? undefined,
         kemantren: area?.detail?.kemantren?.name ?? undefined,
         line_id: line.id,
         luas_area,

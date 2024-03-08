@@ -14,6 +14,7 @@ export interface IArea extends IDefaultData {
   line_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
   images?: any;
+  location?: object;
 }
 
 export interface IAreaDocument extends IArea, Document {}
@@ -28,6 +29,8 @@ const areaSchema = new Schema<IArea>({
   link_google_map: { type: String, required: false },
   parent_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
   line_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'lines' },
+  location: { type: Object, required: false },
+
   detail: {
     group: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'groups' },
     standard_area: { type: Number, required: false },

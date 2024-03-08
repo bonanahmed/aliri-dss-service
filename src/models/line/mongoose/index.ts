@@ -13,6 +13,7 @@ export interface ILine extends IDefaultData {
   area_id?: mongoose.Schema.Types.ObjectId | null;
   detail: object;
   images?: any;
+  location?: object;
 }
 
 export interface ILineDocument extends ILine, Document {}
@@ -24,7 +25,7 @@ const lineSchema = new Schema<ILine>({
   code: { type: String, required: true },
   hierarchy_code: { type: String, required: false },
   images: { type: Array, required: false },
-
+  location: { type: Object, required: false },
   type: { type: String, required: true },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'areas' },
   node_id: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'nodes' },
