@@ -4,6 +4,9 @@ import ApiError from '../utils/ApiError';
 import { IAreaDocument } from '../models/area/mongoose';
 import AreaSensor from '../models/area-sensor/mongoose';
 import { getRealtimeValues } from './scada.service';
+import { AreaDocument } from '../models/area-document';
+import { IAreaDocumentDataDocument } from '../models/area-document/mongoose';
+import AreaConfiguration, { IAreaConfigurationDocument } from '../models/area-configuration/mongoose';
 
 /**
  * Create a user
@@ -162,4 +165,105 @@ export const getAreaSensors = async (areaId: string, filter: any): Promise<any> 
 export const getAreaSensorDetail = async (sensorId: string): Promise<any> => {
   const sensor = await AreaSensor.findById(sensorId);
   return sensor;
+};
+
+/**
+ * Query for users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<any>}
+ */
+export const getDocuments = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ document_name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
+  const documents = options.limit ? await AreaDocument.paginate(filter, options) : await AreaDocument.find(filter);
+  return documents;
+};
+
+/**
+ * Create a user
+ * @param {Object} body
+ * @returns {Promise<IAreaDocumentDataDocument>}
+ */
+export const createDocument = async (body: any): Promise<IAreaDocumentDataDocument> => {
+  return await AreaDocument.create(body);
+};
+
+/**
+ * Delete user by id
+ * @param {string} documentId
+ * @returns {Promise<IAreaDocumentDataDocument | null>}
+ */
+export const deleteDocumentById = async (documentId: string): Promise<IAreaDocumentDataDocument | null> => {
+  return await AreaDocument.findByIdAndRemove(documentId);
+};
+/**
+ * Query for users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<any>}
+ */
+export const getConfigurations = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ document_name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
+  const documents = options.limit ? await AreaConfiguration.paginate(filter, options) : await AreaConfiguration.find(filter);
+  return documents;
+};
+
+/**
+ * Create a user
+ * @param {Object} body
+ * @returns {Promise<IAreaConfigurationDocument>}
+ */
+export const createConfiguration = async (body: any): Promise<IAreaConfigurationDocument> => {
+  return await AreaConfiguration.create(body);
+};
+
+/**
+ * Delete user by id
+ * @param {string} documentId
+ * @returns {Promise<IAreaConfigurationDocument | null>}
+ */
+export const deleteConfigurationById = async (documentId: string): Promise<IAreaConfigurationDocument | null> => {
+  return await AreaConfiguration.findByIdAndRemove(documentId);
+};
+
+/**
+ * Get user by id
+ * @param {string} id
+ * @returns {Promise<IAreaConfigurationDocument | null>}
+ */
+export const getConfigurationDetailById = async (id: string): Promise<IAreaConfigurationDocument | null> => {
+  return await AreaConfiguration.findById(id);
+};
+
+/**
+ * Update user by id
+ * @param {string} configId
+ * @param {Object} updateBody
+ * @returns {Promise<IAreaConfigurationDocument | null>}
+ */
+export const updateConfigurationById = async (
+  configId: string,
+  updateBody: any
+): Promise<IAreaConfigurationDocument | null> => {
+  const area = await getConfigurationDetailById(configId);
+  if (!area) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Area Configuration not found');
+  }
+  Object.assign(area, updateBody);
+  await area.save();
+  return area;
 };

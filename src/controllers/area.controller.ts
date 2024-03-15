@@ -70,3 +70,55 @@ export const getAreaSensorDetail = catchAsync(async (req, res) => {
   const sensor = await areaService.getAreaSensorDetail(req.params.sensorId);
   ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
 });
+
+export const getDocuments = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'area_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+  const documents = await areaService.getDocuments(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], documents);
+});
+
+export const createDocument = catchAsync(async (req, res) => {
+  const body = req.body;
+  const sensor = await areaService.createDocument(body);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const deleteDocument = catchAsync(async (req, res) => {
+  const area = await areaService.deleteDocumentById(req.params.documentId);
+  ApiResponse(res, httpStatus.OK, 'delete success', area);
+});
+export const getConfigurations = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'area_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+  const documents = await areaService.getConfigurations(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], documents);
+});
+
+export const createConfiguration = catchAsync(async (req, res) => {
+  const body = req.body;
+  const sensor = await areaService.createConfiguration(body);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
+export const deleteConfiguration = catchAsync(async (req, res) => {
+  const area = await areaService.deleteConfigurationById(req.params.configId);
+  ApiResponse(res, httpStatus.OK, 'delete success', area);
+});
+
+export const getConfigurationDetail = catchAsync(async (req, res) => {
+  const area = await areaService.getConfigurationDetailById(req.params.configId);
+  if (!area) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
+  }
+  ApiResponse(res, httpStatus.OK, httpStatus[200], area);
+});
+
+export const updateConfiguration = catchAsync(async (req, res) => {
+  const area = await areaService.updateConfigurationById(req.params.configId, req.body);
+  ApiResponse(res, httpStatus.OK, 'update success', area);
+});

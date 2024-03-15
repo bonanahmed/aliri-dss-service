@@ -36,4 +36,10 @@ router
     accountController.deleteUserAndAccount
   );
 
+router.route('/password/:id').patch(
+  auth(),
+  // validate(accountValidation.updateUserAndAccount),
+  accountController.updatePassword
+);
+
 export default router;

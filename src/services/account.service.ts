@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import ApiError from '../utils/ApiError';
 import { Account } from '../models/account';
 import { User } from '../models/user';
+import bcrypt from 'bcrypt';
 
 /**
  * Query for users
@@ -106,6 +107,33 @@ const deleteAccountAndUser = async (id: string): Promise<any> => {
   await Account.findByIdAndRemove(id);
   await User.findOneAndRemove({ account_id: id });
   return { account, user };
+};
+
+/**
+ * Update account by id
+ * @param {string} id
+ * @param {Object} updateBody
+ * @returns {Promise<any>} // You can change the return type as per your requirements
+ */
+export const updatePassword = async (id: string, updateBody: any): Promise<any> => {
+  const account = await Account.findById(id);
+  if (!account) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User Or Account not found');
+  }
+
+  // Update the account object with the provided updateBody
+  updateBody.password = await bcrypt.hash(updateBody.password, 8);
+  if (account) {
+    Object.assign(account, updateBody);
+    await account.save();
+  }
+
+  // Construct the return object, excluding the password field from account
+  const returnObject = {
+    account: account ? { ...account.toObject(), password: undefined } : undefined,
+  };
+
+  return returnObject;
 };
 
 export { getAccountsAndUsers, getAccountAndUserById, updateAccountAndUserById, deleteAccountAndUser };

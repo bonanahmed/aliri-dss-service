@@ -47,4 +47,20 @@ router.route('/data-sensor/:sensorId/detail').get(areaController.getAreaSensorDe
 
 router.route('/data-sensor').post(areaController.upsertDataAreaSensor);
 
+router.route('/documents/list').get(areaController.getDocuments);
+
+router.route('/documents/create').post(areaController.createDocument);
+
+router.route('/documents/:documentId').delete(areaController.deleteDocument);
+
+router.route('/configuration/list').get(areaController.getConfigurations);
+
+router.route('/configuration/create').post(areaController.createConfiguration);
+
+router.route('/configuration/:configId').delete(areaController.deleteConfiguration);
+
+router.route('/configuration/:configId').get(areaController.getConfigurationDetail);
+
+router.route('/configuration/:configId').patch(areaController.updateConfiguration);
+
 export default router;

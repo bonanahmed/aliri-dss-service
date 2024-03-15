@@ -6,7 +6,7 @@ import { accountService, authService, tokenService, userService } from '../servi
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
 
-const createUserAndAccount = catchAsync(async (req: Request, res: Response) => {
+export const createUserAndAccount = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
   const account = await authService.registerAccount({
     ...body,
@@ -24,7 +24,7 @@ const createUserAndAccount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getUsersAndAccounts = catchAsync(async (req, res) => {
+export const getUsersAndAccounts = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['search', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const accounts = await accountService.getAccountsAndUsers(filter, options);
@@ -32,7 +32,7 @@ const getUsersAndAccounts = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], accounts);
 });
 
-const getUserAndAccount = catchAsync(async (req, res) => {
+export const getUserAndAccount = catchAsync(async (req, res) => {
   const result = await accountService.getAccountAndUserById(req.params.id);
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
@@ -40,15 +40,18 @@ const getUserAndAccount = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
 
-const updateUserAndAccount = catchAsync(async (req, res) => {
+export const updateUserAndAccount = catchAsync(async (req, res) => {
   const account = await accountService.updateAccountAndUserById(req.params.id, req.body);
   ApiResponse(res, httpStatus.OK, 'Data Berhasil Diupdate', { account });
 });
 
-const deleteUserAndAccount = catchAsync(async (req, res) => {
+export const updatePassword = catchAsync(async (req, res) => {
+  const account = await accountService.updateAccountAndUserById(req.params.id, req.body);
+  ApiResponse(res, httpStatus.OK, 'Data Berhasil Diupdate', { account });
+});
+
+export const deleteUserAndAccount = catchAsync(async (req, res) => {
   const account = await accountService.deleteAccountAndUser(req.params.id);
   // res.status(httpStatus.NO_CONTENT).send();
   ApiResponse(res, httpStatus.OK, 'Data Berhasil Dihapus', account);
 });
-
-export { createUserAndAccount, getUserAndAccount, getUsersAndAccounts, updateUserAndAccount, deleteUserAndAccount };

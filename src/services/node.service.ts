@@ -12,6 +12,7 @@ import moment from 'moment';
 import axios from 'axios';
 import { NodeSensor } from '../models/node-sensor';
 import { getRealtimeValues } from './scada.service';
+import AreaConfiguration from '../models/area-configuration/mongoose';
 
 /**
  * Create a user
@@ -360,11 +361,15 @@ export const calculateFlow = async (nodeId: string, date: string) => {
     let panjangSaluran = 0;
     let faktorDistribusi = 0;
     if (checkNodeData.line_id.type === 'primer') {
-      panjangSaluran = 9232;
-      faktorDistribusi = 0.9;
+      // panjangSaluran = 9232;
+      panjangSaluran = parseFloat((await AreaConfiguration.findOne({ key: 'panjang_saluran_primer' }))?.value ?? '0');
+      faktorDistribusi = parseFloat((await AreaConfiguration.findOne({ key: 'faktor_distribusi_primer' }))?.value ?? '0');
+      // faktorDistribusi = 0.9;
     } else if (checkNodeData.line_id.type === 'sekunder') {
-      panjangSaluran = 68223;
-      faktorDistribusi = 0.3;
+      // panjangSaluran = 68223;
+      panjangSaluran = parseFloat((await AreaConfiguration.findOne({ key: 'panjang_saluran_sekunder' }))?.value ?? '0');
+      faktorDistribusi = parseFloat((await AreaConfiguration.findOne({ key: 'faktor_distribusi_sekunder' }))?.value ?? '0');
+      // faktorDistribusi = 0.3;
     }
     const distance_total = nodeData.distance_to_prev ?? 0;
     const faktor_loses = (distance_total ?? 0) / panjangSaluran;
@@ -409,10 +414,11 @@ export const calculateFlow = async (nodeId: string, date: string) => {
   let faktorDistribusi = 0;
   if (returnData.line_id.type === 'primer') {
     panjangSaluran = 9232;
-    faktorDistribusi = 0.9;
+    faktorDistribusi = parseFloat((await AreaConfiguration.findOne({ key: 'faktor_distribusi_primer' }))?.value ?? '0');
+    // faktorDistribusi = 0.9;
   } else if (returnData.line_id.type === 'sekunder') {
     panjangSaluran = 68223;
-    faktorDistribusi = 0.3;
+    faktorDistribusi = parseFloat((await AreaConfiguration.findOne({ key: 'faktor_distribusi_sekunder' }))?.value ?? '0');
   }
   const distance_total = node.distance_to_prev ?? 0;
   const faktor_loses = (distance_total ?? 0) / panjangSaluran;
