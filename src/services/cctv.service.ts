@@ -25,8 +25,19 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
     ...filter,
     ['detail.cctv_list']: { $exists: true },
   };
-  const nodes: any = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
-  return nodes;
+  // const nodes: any = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
+  const nodes = await Node.find(filter);
+  let dataReturn: Array<any> = [];
+  nodes.forEach((item: any, index: number) => {
+    item.detail.cctv_list.forEach((dataCCTV: any) => {
+      let dataMaster = item;
+      dataMaster.detail.cctv_list = [dataCCTV];
+      dataReturn.push(dataMaster);
+    });
+  });
+  return {
+    docs: dataReturn,
+  };
 };
 
 export const generateLinkHikVision = async (cctv: any) => {
