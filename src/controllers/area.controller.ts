@@ -122,3 +122,12 @@ export const updateConfiguration = catchAsync(async (req, res) => {
   const area = await areaService.updateConfigurationById(req.params.configId, req.body);
   ApiResponse(res, httpStatus.OK, 'update success', area);
 });
+
+export const getFlowSummaries = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'area_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+  const summaries = await areaService.getFlowSummaries(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], summaries);
+});

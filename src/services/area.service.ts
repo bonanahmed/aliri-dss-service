@@ -7,6 +7,8 @@ import { getRealtimeValues } from './scada.service';
 import { AreaDocument } from '../models/area-document';
 import { IAreaDocumentDataDocument } from '../models/area-document/mongoose';
 import AreaConfiguration, { IAreaConfigurationDocument } from '../models/area-configuration/mongoose';
+import Line from '../models/line/mongoose';
+import { calculateFlow } from './node.service';
 
 /**
  * Create a user
@@ -203,6 +205,7 @@ export const createDocument = async (body: any): Promise<IAreaDocumentDataDocume
 export const deleteDocumentById = async (documentId: string): Promise<IAreaDocumentDataDocument | null> => {
   return await AreaDocument.findByIdAndRemove(documentId);
 };
+
 /**
  * Query for users
  * @param {Object} filter - Mongo filter
@@ -266,4 +269,40 @@ export const updateConfigurationById = async (
   Object.assign(area, updateBody);
   await area.save();
   return area;
+};
+
+/**
+ * Query for users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<any>}
+ */
+export const getFlowSummaries = async (filter: any, options: any): Promise<any> => {
+  filter.$or = [];
+  if (filter.search) {
+    filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
+  filter.$or.push({
+    type: 'primer',
+  });
+  filter.$or.push({
+    type: 'sekunder',
+  });
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
+  const summaries: any = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
+  summaries.docs = await Promise.all(
+    summaries.docs.map(async (item: any, index: number) => {
+      let dataFlow: any;
+      dataFlow = await calculateFlow(item.node_id, '');
+      return {
+        ...item._doc,
+        debit_rekomendasi: dataFlow.total_debit_kebutuhan,
+      };
+    })
+  );
+  return summaries;
 };

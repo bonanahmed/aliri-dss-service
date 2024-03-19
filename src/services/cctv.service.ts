@@ -30,9 +30,10 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
   let dataReturn: Array<any> = [];
   nodes.forEach((item: any, index: number) => {
     item.detail.cctv_list.forEach((dataCCTV: any) => {
-      let dataMaster = item;
-      dataMaster.detail.cctv_list = [dataCCTV];
-      dataReturn.push(dataMaster);
+      dataReturn.push({
+        name: item.name,
+        cctv_list: [dataCCTV],
+      });
     });
   });
   return {

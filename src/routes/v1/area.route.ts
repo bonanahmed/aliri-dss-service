@@ -63,4 +63,6 @@ router.route('/configuration/:configId').get(areaController.getConfigurationDeta
 
 router.route('/configuration/:configId').patch(areaController.updateConfiguration);
 
+router.route('/flow/summary/list').get(areaController.getFlowSummaries);
+
 export default router;
