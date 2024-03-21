@@ -84,6 +84,11 @@ export const deleteNodeSensor = catchAsync(async (req, res) => {
   const sensor = await nodeService.deleteNodeSensor(req.params.nodeId);
   ApiResponse(res, httpStatus.OK, 'delete success', sensor);
 });
+
+export const updateManyNodes = catchAsync(async (req, res) => {
+  const node = await nodeService.updateManyNodes(req.body);
+  ApiResponse(res, httpStatus.OK, 'updates success', node);
+});
 // export const convertToHm = catchAsync(async (req, res) => {
 //   const node = await nodeService.convertToHm();
 //   ApiResponse(res, httpStatus.OK, 'convert success', node);

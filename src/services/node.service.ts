@@ -96,6 +96,34 @@ export const deleteNodeById = async (nodeId: string): Promise<INodeDocument | nu
   return node;
 };
 
+/**
+ * Update user by id
+ * @param {Object} updateBody
+ * @returns {Promise<INodeDocument | null>}
+ */
+export const updateManyNodes = async (updateBody: any[]): Promise<INodeDocument[] | null> => {
+  const promises: any[] = [];
+  for (const data of updateBody) {
+    if (data.id) {
+      const dataLocation = {
+        location: {
+          type: data.mapType,
+          data: {
+            lat: parseFloat(data.Latitude.replace(',', '.')),
+            lng: parseFloat(data.Longitude.replace(',', '.')),
+          },
+        },
+      };
+      console.log(data.id, dataLocation);
+      const node = await Node.findByIdAndUpdate(data.id, {
+        ...dataLocation,
+      });
+      promises.push(node);
+    }
+  }
+  return await promises;
+};
+
 export const generatePapanEksploitasi = async (nodeId: string): Promise<any> => {
   let totalData: any = [];
   const data1: any = await recursiveFunction(nodeId, false, true, '', false);

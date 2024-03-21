@@ -2,6 +2,8 @@ import httpStatus from 'http-status';
 import { Template } from '../models/template'; // Import the ITemplateDocument type from your models
 import ApiError from '../utils/ApiError';
 import { Node } from '../models/node';
+import Line from '../models/line/mongoose';
+import Area from '../models/area/mongoose';
 
 /**
  * Get user by id
@@ -9,6 +11,41 @@ import { Node } from '../models/node';
  */
 export const getDashboard = async (): Promise<any> => {
   // assignPrevNode();
+};
+
+/**
+ * Get maps data
+ * @returns {Promise<any>}
+ * @param {Object} filter - Mongo filter
+ */
+export const getMaps = async (filter: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
+    delete filter.search;
+  }
+  filter = {
+    ...filter,
+    ['location']: { $exists: true },
+  };
+  const nodes = await Node.find(filter).select('id name location type');
+  const lines = await Line.find({
+    type: {
+      $ne: 'tersier',
+    },
+    location: { $exists: true },
+  }).select('id name location type');
+  const areas = await Area.find({
+    type: {
+      $ne: 'daerah irigasi',
+    },
+    location: { $exists: true },
+  }).select('id name location type');
+  // assignPrevNode();
+  return {
+    nodes,
+    lines,
+    areas,
+  };
 };
 
 const assignPrevNode = async () => {

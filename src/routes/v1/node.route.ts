@@ -60,6 +60,8 @@ router.route('/data-sensor-detail/:sensorId').get(nodeController.getDataNodeSens
 
 router.route('/public/list').get(nodeController.getNodes);
 
+router.route('/update/many').patch(auth(), nodeController.updateManyNodes);
+
 // router.route('/convert/hm').get(nodeController.convertToHm);
 
 export default router;

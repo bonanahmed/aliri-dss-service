@@ -9,3 +9,9 @@ export const getDashboard = catchAsync(async (req, res) => {
   const result = await dashboardService.getDashboard();
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
+
+export const getMaps = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search']);
+  const result = await dashboardService.getMaps(filter);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+});
