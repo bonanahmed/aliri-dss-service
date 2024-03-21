@@ -8,6 +8,6 @@ const router = express.Router();
 
 router.route('/').get(auth(), dashboardController.getDashboard);
 
-router.route('/maps').get(auth(), dashboardController.getMaps);
+router.route('/maps').get(dashboardController.getMaps);
 
 export default router;

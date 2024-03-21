@@ -6,7 +6,7 @@ import { IAccountDocument } from '../models/account/mongoose';
 import ApiResponse from '../utils/ApiResponse';
 import config from '../config/config';
 
-const register = catchAsync(async (req: Request, res: Response) => {
+export const register = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
   const account = await authService.registerAccount(body);
   const user = await userService.createUser({
@@ -20,7 +20,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const login = catchAsync(async (req: Request, res: Response) => {
+export const login = catchAsync(async (req: Request, res: Response) => {
   const { username, password } = req.body;
   const account = await authService.loginWithUsernameAndPassword(username, password);
   const tokens = await tokenService.generateAuthTokens(account);
@@ -36,7 +36,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const logout = catchAsync(async (req: Request, res: Response) => {
+export const logout = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as IAccountDocument;
   await authService.logout(user?.id);
   const cookiesOption: any = {
@@ -47,14 +47,14 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   ApiResponse(res, httpStatus.OK, 'Logout Berhasil');
 });
 
-const refreshTokens = catchAsync(async (req: Request, res: Response) => {
+export const refreshTokens = catchAsync(async (req: Request, res: Response) => {
   const tokens = await authService.refreshAuth(req.body.refreshToken);
   ApiResponse(res, httpStatus.OK, httpStatus[200], {
     tokens,
   });
 });
 
-const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+export const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
   const { email } = body;
   const resetPasswordToken = await tokenService.generateResetPasswordToken(email);
@@ -63,7 +63,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   ApiResponse(res, httpStatus.NO_CONTENT, 'create reset token success');
 });
 
-const resetPassword = catchAsync(async (req, res) => {
+export const resetPassword = catchAsync(async (req, res) => {
   const token = req.query.token as string | undefined;
 
   if (token === undefined) {
@@ -77,7 +77,7 @@ const resetPassword = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.NO_CONTENT, 'reset password success');
 });
 
-const sendVerificationEmail = catchAsync(async (req: Request, res: Response) => {
+export const sendVerificationEmail = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as IAccountDocument;
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(user);
   await emailService.sendVerificationEmail(user!.email!, verifyEmailToken);
@@ -85,11 +85,15 @@ const sendVerificationEmail = catchAsync(async (req: Request, res: Response) => 
   ApiResponse(res, httpStatus.NO_CONTENT, 'send email verification success');
 });
 
-const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const token = req.query.token as string;
   await authService.verifyEmail(token);
   // res.status(httpStatus.NO_CONTENT).send();
   ApiResponse(res, httpStatus.NO_CONTENT, 'verify email success');
 });
 
-export { login, register, logout, refreshTokens, forgotPassword, resetPassword, sendVerificationEmail, verifyEmail };
+export const getData = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as IAccountDocument;
+  // const getRolesRight = await rolesRight(user?.role);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], user);
+});
