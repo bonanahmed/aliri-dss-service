@@ -4,6 +4,8 @@ import ApiError from '../utils/ApiError';
 import catchAsync from '../utils/catchAsync';
 import { nodeService } from '../services';
 import ApiResponse from '../utils/ApiResponse';
+import { addDaysToDate, daysBetweenDates } from '../utils/dateUtils';
+import moment from 'moment';
 
 export const createNode = catchAsync(async (req, res) => {
   const node = await nodeService.createNode(req.body);
@@ -88,6 +90,50 @@ export const deleteNodeSensor = catchAsync(async (req, res) => {
 export const updateManyNodes = catchAsync(async (req, res) => {
   const node = await nodeService.updateManyNodes(req.body);
   ApiResponse(res, httpStatus.OK, 'updates success', node);
+});
+
+//Actual Flow
+export const upsertDataNodeToLineDataActual = catchAsync(async (req, res) => {
+  const body = req.body;
+  let returnData: any;
+
+  if (body.dataFilter.withDate) {
+    const days = daysBetweenDates(body.dataFilter.startDate, body.dataFilter.endDate);
+    let promises = [];
+    for (let i = 0; i <= days; i++) {
+      const newBody = {
+        ...body,
+        date: addDaysToDate(body.dataFilter.startDate, i),
+      };
+      delete newBody.dataFilter;
+      const data = await nodeService.upsertDataNodeToLineDataActual(newBody);
+      promises.push(data);
+      returnData = await Promise.all(promises);
+    }
+  } else {
+    const data = await nodeService.upsertDataNodeToLineDataActual({
+      ...body,
+      date: moment(new Date()).format('YYYY-MM-DD'),
+    });
+    returnData = data;
+  }
+  ApiResponse(res, httpStatus.OK, 'Tambah Data Berhasil', returnData);
+});
+
+export const getDataNodeToLineDataActuals = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'type', 'parent_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+  filter.node_id = req.params.nodeId;
+  const result = await nodeService.getDataNodeToLineDataActuals(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+});
+
+export const getDataNodeToLineDataActual = catchAsync(async (req, res) => {
+  const query = req.query;
+  const data = await nodeService.getDataNodeToLineDataActual(req.params.nodeId, req.params.lineId, query);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], data);
 });
 // export const convertToHm = catchAsync(async (req, res) => {
 //   const node = await nodeService.convertToHm();

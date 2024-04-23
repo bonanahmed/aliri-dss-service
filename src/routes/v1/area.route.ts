@@ -14,7 +14,6 @@ router
     areaController.createArea
   )
   .get(
-    auth(),
     // validate(areaValidation.getAreas),
     areaController.getAreas
   );

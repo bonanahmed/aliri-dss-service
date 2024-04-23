@@ -13,6 +13,7 @@ import axios from 'axios';
 import { NodeSensor } from '../models/node-sensor';
 import { getRealtimeValues } from './scada.service';
 import AreaConfiguration from '../models/area-configuration/mongoose';
+import { NodeToLineDataActual } from '../models/actual-flow';
 
 /**
  * Create a user
@@ -629,6 +630,8 @@ export const linesInNode = async (nodeId: string) => {
   return lines;
 };
 
+//Sensor
+
 export const upsertDataNodeSensor = async (data: any) => {
   const sensor = await NodeSensor.findOneAndUpdate(
     { node_id: data.node_id, direction_line: data.direction_line, sensor_type: data.sensor_type },
@@ -667,4 +670,70 @@ export const getDataNodeSensorDetail = async (sensorId: string) => {
 export const deleteNodeSensor = async (id: string) => {
   const sensor = await NodeSensor.findByIdAndDelete(id);
   return sensor;
+};
+
+//Actual Flow
+export const upsertDataNodeToLineDataActual = async (data: any) => {
+  const dataActual = await NodeToLineDataActual.findOneAndUpdate(
+    { node_id: data.node_id, direction_line: data.direction_line, date: data.date },
+    {
+      ...data,
+    },
+    { upsert: true, new: true, runValidators: true }
+  );
+  return dataActual;
+};
+
+/**
+ * Query for users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<any>}
+ */
+export const getDataNodeToLineDataActuals = async (filter: any, options: any): Promise<any> => {
+  if (filter.search) {
+    filter.$or = [
+      { code: { $regex: new RegExp(filter.search, 'i') } },
+      { name: { $regex: new RegExp(filter.search, 'i') } },
+    ];
+    delete filter.search;
+  }
+  options.populate = [
+    { path: 'node_id', options: { strictPopulate: false } },
+    {
+      path: 'direction_line',
+      options: { strictPopulate: false },
+    },
+  ];
+  const nodes = options.limit
+    ? await NodeToLineDataActual.paginate(filter, options)
+    : await NodeToLineDataActual.find(filter);
+  return nodes;
+};
+
+export const getDataNodeToLineDataActual = async (nodeId: string, lineId: string, filter: any) => {
+  let sensorFind = await NodeSensor.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
+    'direction_line'
+  );
+  if (sensorFind) {
+    if (sensorFind?.sensor_code) {
+      const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
+      await NodeSensor.findByIdAndUpdate(sensorFind.id, {
+        sensor_value: sensorData,
+      });
+    }
+    const sensor = await NodeSensor.findById(sensorFind?.id);
+    return sensor;
+  } else {
+    if (!filter.date) {
+      filter.date = moment(new Date()).format('YYYY-MM-DD');
+    }
+    let dataActualFind = await NodeToLineDataActual.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
+      'direction_line'
+    );
+    return dataActualFind;
+  }
 };

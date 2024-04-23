@@ -62,6 +62,12 @@ router.route('/public/list').get(nodeController.getNodes);
 
 router.route('/update/many').patch(auth(), nodeController.updateManyNodes);
 
+router.route('/actual-flow').post(auth(), nodeController.upsertDataNodeToLineDataActual);
+
+router.route('/actual-flow/:nodeId').get(nodeController.getDataNodeToLineDataActuals);
+
+router.route('/actual-flow/:nodeId/:lineId').get(nodeController.getDataNodeToLineDataActual);
+
 // router.route('/convert/hm').get(nodeController.convertToHm);
 
 export default router;
