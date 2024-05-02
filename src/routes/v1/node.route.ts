@@ -15,7 +15,7 @@ router
     nodeController.createNode
   )
   .get(
-    auth(),
+    // auth(),
     // validate(nodeValidation.getNodes),
 
     nodeController.getNodes
