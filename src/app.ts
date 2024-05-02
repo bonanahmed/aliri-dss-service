@@ -21,7 +21,7 @@ const app = express();
 app.use(
   fileUpload({
     limits: {
-      fileSize: 10000000,
+      fileSize: 100000000,
     },
     abortOnLimit: true,
   })
