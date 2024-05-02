@@ -31,8 +31,8 @@ app.use(express.static(path.join(__dirname, './../public')));
 // set security HTTP headers
 app.use(helmet());
 
-app.use(json({ limit: '10mb' }));
-app.use(urlencoded({ limit: '10mb', extended: true }));
+app.use(json({ limit: '100mb' }));
+app.use(urlencoded({ limit: '100mb', extended: true }));
 
 // sanitize request data
 app.use(mongoSanitize());
