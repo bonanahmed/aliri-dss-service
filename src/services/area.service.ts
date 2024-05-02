@@ -9,6 +9,7 @@ import { IAreaDocumentDataDocument } from '../models/area-document/mongoose';
 import AreaConfiguration, { IAreaConfigurationDocument } from '../models/area-configuration/mongoose';
 import Line from '../models/line/mongoose';
 import { calculateFlow } from './node.service';
+import { NodeToLineDataActual } from '../models/actual-flow';
 
 /**
  * Create a user
@@ -293,14 +294,24 @@ export const getFlowSummaries = async (filter: any, options: any): Promise<any> 
     type: 'sekunder',
   });
   options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
+  options.select = '_id id name node_id';
   const summaries: any = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
   summaries.docs = await Promise.all(
     summaries.docs.map(async (item: any, index: number) => {
       let dataFlow: any;
       dataFlow = await calculateFlow(item.node_id, '');
+      let debit_rekomendasi;
+      Object.entries(dataFlow.direction).forEach((flowData: any) => {
+        if (item._id.toString() === flowData[1].line_id.toString()) {
+          debit_rekomendasi = flowData[1].debit_kebutuhan;
+        }
+      });
+      const debit_aktual = await NodeToLineDataActual.findOne({ direction_line: item._id, node_id: item.node_id });
       return {
         ...item._doc,
-        debit_rekomendasi: dataFlow.total_debit_kebutuhan,
+        debit_rekomendasi: debit_rekomendasi,
+        debit_aktual: debit_aktual?.actual_flow_value,
+        selisih_debit: (debit_rekomendasi ?? 0) - (debit_aktual?.actual_flow_value ?? 0),
       };
     })
   );
