@@ -427,6 +427,7 @@ export const calculateFlow = async (nodeId: string, date: string) => {
         [node.line_id.name]: {
           line_id: node.line_id._id,
           juru: lineDetail?.detail?.juru?.name ?? '',
+          juru_phone: lineDetail?.detail?.juru?.mobile_phone_number ?? undefined,
           kemantren: lineDetail?.detail?.kemantren?.name ?? '',
           luas_area: (returnData.direction[node.line_id.name]?.luas_area ?? 0) + checkNodeData.total_luas_area,
           debit_kebutuhan: debit_loses,
@@ -502,6 +503,7 @@ const checkNode = async (node: any, date: string) => {
         direction[line.name] = {
           line_id: line.id,
           juru: line.detail?.juru?.name ?? '',
+          juru_phone: line?.detail?.juru?.mobile_phone_number ?? undefined,
           kemantren: line.detail?.kemantren?.name ?? '',
           luas_area: (direction[line.name]?.luas_area ?? 0) + nodeDetail.total_luas_area,
           debit_kebutuhan: debit_dengan_loses,
@@ -715,25 +717,30 @@ export const getDataNodeToLineDataActuals = async (filter: any, options: any): P
 };
 
 export const getDataNodeToLineDataActual = async (nodeId: string, lineId: string, filter: any) => {
-  let sensorFind = await NodeSensor.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
+  // if (!filter.date) delete filter.date;
+  // let sensorFind = await NodeSensor.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
+  //   'direction_line'
+  // );
+  // if (sensorFind?.sensor_code) {
+  //   const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
+  //   await NodeSensor.findByIdAndUpdate(sensorFind.id, {
+  //     sensor_value: sensorData,
+  //   });
+  //   const sensor = await NodeSensor.findById(sensorFind?.id);
+  //   return sensor;
+  // }
+  // else {
+  if (!filter.date) {
+    filter.date = moment(new Date()).format('YYYY-MM-DD');
+  }
+  let dataActualFind = await NodeToLineDataActual.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
     'direction_line'
   );
-  if (sensorFind) {
-    if (sensorFind?.sensor_code) {
-      const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
-      await NodeSensor.findByIdAndUpdate(sensorFind.id, {
-        sensor_value: sensorData,
-      });
-    }
-    const sensor = await NodeSensor.findById(sensorFind?.id);
-    return sensor;
-  } else {
-    if (!filter.date) {
-      filter.date = moment(new Date()).format('YYYY-MM-DD');
-    }
-    let dataActualFind = await NodeToLineDataActual.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
-      'direction_line'
-    );
-    return dataActualFind;
-  }
+  return dataActualFind;
+  // }
+};
+
+export const deleteNodeToLineDataActual = async (id: string) => {
+  const node = await NodeToLineDataActual.findByIdAndDelete(id);
+  return node;
 };

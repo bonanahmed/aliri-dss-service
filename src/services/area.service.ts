@@ -296,6 +296,7 @@ export const getFlowSummaries = async (filter: any, options: any): Promise<any> 
   options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
   options.select = '_id id name node_id';
   const summaries: any = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
+  console.log(summaries);
   summaries.docs = await Promise.all(
     summaries.docs.map(async (item: any, index: number) => {
       let dataFlow: any;

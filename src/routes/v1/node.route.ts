@@ -68,6 +68,8 @@ router.route('/actual-flow/:nodeId').get(nodeController.getDataNodeToLineDataAct
 
 router.route('/actual-flow/:nodeId/:lineId').get(nodeController.getDataNodeToLineDataActual);
 
+router.route('/actual-flow/delete/:actualFlowId').delete(nodeController.deleteNodeToLineDataActual);
+
 // router.route('/convert/hm').get(nodeController.convertToHm);
 
 export default router;

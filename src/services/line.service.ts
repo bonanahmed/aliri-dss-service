@@ -37,7 +37,14 @@ const getLines = async (filter: any, options: any): Promise<any> => {
     {
       path: 'node_id',
       options: { strictPopulate: false },
-      populate: { path: 'line_id', options: { strictPopulate: false } },
+      populate: {
+        path: 'line_id',
+        options: { strictPopulate: false },
+      },
+    },
+    {
+      path: 'detail.juru',
+      options: { strictPopulate: false },
     },
   ];
 

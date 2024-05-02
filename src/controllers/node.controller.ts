@@ -135,6 +135,11 @@ export const getDataNodeToLineDataActual = catchAsync(async (req, res) => {
   const data = await nodeService.getDataNodeToLineDataActual(req.params.nodeId, req.params.lineId, query);
   ApiResponse(res, httpStatus.OK, httpStatus[200], data);
 });
+
+export const deleteNodeToLineDataActual = catchAsync(async (req, res) => {
+  const node = await nodeService.deleteNodeToLineDataActual(req.params.actualFlowId);
+  ApiResponse(res, httpStatus.OK, 'delete success', node);
+});
 // export const convertToHm = catchAsync(async (req, res) => {
 //   const node = await nodeService.convertToHm();
 //   ApiResponse(res, httpStatus.OK, 'convert success', node);
