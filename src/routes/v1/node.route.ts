@@ -24,7 +24,7 @@ router
 router
   .route('/:nodeId')
   .get(
-    auth(),
+    // auth(),
     // validate(nodeValidation.getNode),
 
     nodeController.getNode
