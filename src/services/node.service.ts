@@ -64,7 +64,7 @@ export const getNodes = async (filter: any, options: any): Promise<any> => {
  * @returns {Promise<INodeDocument | null>}
  */
 export const getNodeById = async (id: string): Promise<INodeDocument | null> => {
-  return Node.findById(id);
+  return Node.findById(id).populate('line_id');
 };
 
 /**
