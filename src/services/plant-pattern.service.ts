@@ -14,21 +14,36 @@ import { Node } from '../models/node';
  */
 const savePlantPattern = async (body: any, date: string): Promise<any> => {
   const areas = body;
-  await PlantPattern.deleteMany({
-    date: { $regex: `^${date}` },
-  });
   let bodyPlantPatternNew: any = [];
-  areas.forEach(async (area: any) => {
-    area.plant_patterns.forEach(async (date_plant: any[]) => {
+  for (const area of areas) {
+    await PlantPattern.deleteMany({
+      date: { $regex: `^${date}` },
+      area_id: area._id,
+    });
+    for (const date_plant of area.plant_patterns) {
       bodyPlantPatternNew.push({
         ...date_plant,
         line_id: area.line_id,
         area_id: area._id,
         id: undefined,
       });
-    });
-  });
-  return await PlantPattern.insertMany(bodyPlantPatternNew);
+    }
+  }
+  // areas.forEach(async (area: any) => {
+  //   await PlantPattern.deleteMany({
+  //     date: { $regex: `^${date}` },
+  //     area_id: area.id,
+  //   });
+  //   area.plant_patterns.forEach(async (date_plant: any[]) => {
+  //     bodyPlantPatternNew.push({
+  //       ...date_plant,
+  //       line_id: area.line_id,
+  //       area_id: area._id,
+  //       id: undefined,
+  //     });
+  //   });
+  // });
+  return await PlantPattern.insertMany(await Promise.all(bodyPlantPatternNew));
 };
 
 /**

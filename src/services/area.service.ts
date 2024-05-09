@@ -39,6 +39,8 @@ export const getAreas = async (filter: any, options: any): Promise<any> => {
   }
   options.populate = [
     { path: 'parent_id', options: { strictPopulate: false } },
+    { path: 'detail.juru', options: { strictPopulate: false } },
+    { path: 'detail.group', options: { strictPopulate: false } },
     {
       path: 'line_id',
       options: { strictPopulate: false },

@@ -46,6 +46,10 @@ const getLines = async (filter: any, options: any): Promise<any> => {
       path: 'detail.juru',
       options: { strictPopulate: false },
     },
+    {
+      path: 'detail.kemantren',
+      options: { strictPopulate: false },
+    },
   ];
 
   const lines = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
