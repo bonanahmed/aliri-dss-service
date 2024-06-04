@@ -1,15 +1,27 @@
-FROM node:alpine
+# Fetching the minified node image on apline linux
+FROM node:slim
 
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
+# Declaring env
+ENV NODE_ENV production
 
-WORKDIR /usr/src/node-app
+# Setting up the work directory
+WORKDIR /express-docker
 
-COPY package.json yarn.lock ./
+# Copying all the files in our project
+COPY . .
 
-USER node
+# Installing dependencies
+RUN npm install
 
-RUN yarn install --pure-lockfile
+# Installing pm2 globally
+RUN npm install pm2 -g
 
-COPY --chown=node:node . .
+RUN npm install -g bun
 
-EXPOSE 3000
+# Starting our application
+# CMD pm2 start process.yml && tail -f /dev/null
+CMD pm2 start ecosystem.config.json && tail -f /dev/null
+# CMD ["npm", "start"]
+
+# Exposing server port
+EXPOSE 8000
