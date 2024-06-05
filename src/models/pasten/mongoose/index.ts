@@ -13,6 +13,7 @@ export interface IPasten extends IDefaultData {
   actual_water_needed?: number | 0;
   raw_material_area_planted?: number | 0;
   water_flow?: number | 0;
+  area_id: mongoose.Schema.Types.ObjectId;
 }
 
 export interface IPastenDocument extends IPasten, Document {}
@@ -28,6 +29,8 @@ const pastenSchema = new Schema<IPasten>({
   actual_water_needed: { type: Number, required: false },
   raw_material_area_planted: { type: Number, required: false },
   water_flow: { type: Number, required: false },
+  area_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'areas' },
+
   ...DefaultData,
 });
 

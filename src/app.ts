@@ -61,6 +61,7 @@ const allowedOrigins = [
   'http://localhost:61646',
   'https://kedung-putri-web.wsi.digibay.id',
   'https://airso.id',
+  'https://gunbasa.digibay.id',
   '*',
   // Add more origins as needed
 ];

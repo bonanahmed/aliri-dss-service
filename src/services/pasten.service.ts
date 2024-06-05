@@ -26,6 +26,7 @@ const getPastens = async (filter: any, options: any): Promise<any> => {
     filter.$or = [{ code: { $regex: new RegExp(filter.search, 'i') } }];
     delete filter.search;
   }
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
   const pastens = options.limit ? await Pasten.paginate(filter, options) : await Pasten.find(filter);
   return pastens;
 };

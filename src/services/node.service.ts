@@ -557,7 +557,7 @@ const calculatePlantPattern = async (area: any, date?: any) => {
   });
   if (plantPatternActual.length !== 0) {
     return plantPatternActual.map((item: any) => {
-      const raw_material_area_planted = item.raw_material_area_planted;
+      const raw_material_area_planted = item.raw_material_area_planted ?? area?.detail?.standard_area ?? 0;
       const water_flow = raw_material_area_planted * item.pasten * 1.25;
       return {
         area: area.name,
