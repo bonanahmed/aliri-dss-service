@@ -1,6 +1,22 @@
 version: '3'
 
+volumes:
+  dbdata:
+
 services:
   node-app:
     container_name: node-app-prod
-    command: yarn start
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 8001:8000
+  mongodb-app:
+    container_name: mongodb-app
+    image: mongo
+    ports:
+      - 37017:27017
+    environment:
+      - MONGODB_DATABASE='wsi-irigasi'
+    volumes:
+      - dbdata:/data/db
