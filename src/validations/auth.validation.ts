@@ -11,6 +11,8 @@ const register = {
     role: Joi.string().required(),
     mobile_phone_number: Joi.string().required(),
     status: Joi.boolean().required(),
+    gender: Joi.string().required(),
+    address: Joi.string(),
   }),
 };
 

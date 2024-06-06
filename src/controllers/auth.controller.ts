@@ -5,6 +5,7 @@ import { authService, userService, tokenService, emailService } from '../service
 import { IAccountDocument } from '../models/account/mongoose';
 import ApiResponse from '../utils/ApiResponse';
 import config from '../config/config';
+import { Configuration } from '../models/configuration';
 
 export const register = catchAsync(async (req: Request, res: Response) => {
   const { body } = req;
@@ -94,6 +95,14 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 
 export const getData = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as IAccountDocument;
+  const configuration = await Configuration.find();
   // const getRolesRight = await rolesRight(user?.role);
-  ApiResponse(res, httpStatus.OK, httpStatus[200], user);
+  const obj: any = {};
+  configuration.forEach((item: any, inde: number) => {
+    obj[item.key] = {
+      label: item.label,
+      value: item.value,
+    };
+  });
+  ApiResponse(res, httpStatus.OK, httpStatus[200], { user, configuration: obj });
 });

@@ -14,6 +14,7 @@ import accountRoute from './account.route';
 import cctvRoute from './cctv.route';
 import kemantrenRoute from './kemantren.route';
 import uploadRoute from './utils/upload.route';
+import configurationRoute from './configuration.route';
 // import docsRoute from "./docs.route";
 // import config from "../../config/config";
 
@@ -79,6 +80,10 @@ const defaultRoutes = [
   {
     path: '/utils/upload',
     route: uploadRoute,
+  },
+  {
+    path: '/configurations',
+    route: configurationRoute,
   },
 ];
 
