@@ -551,13 +551,18 @@ const checkNode = async (node: any, date: string) => {
 };
 const calculatePlantPattern = async (area: any, date?: any) => {
   const dateNow = date ? date : moment(Date.now()).format('YYYY-MM-DD');
+  const distinctPlantPatternActualCount = await PlantPattern.distinct('code', {
+    area_id: area.id,
+    date: dateNow,
+  });
   const plantPatternActual = await PlantPattern.find({
     area_id: area.id,
     date: dateNow,
   });
   if (plantPatternActual.length !== 0) {
     return plantPatternActual.map((item: any) => {
-      const raw_material_area_planted = item.raw_material_area_planted ?? area?.detail?.standard_area ?? 0;
+      const raw_material_area_planted =
+        item.raw_material_area_planted ?? area?.detail?.standard_area / distinctPlantPatternActualCount.length ?? 0;
       const water_flow = raw_material_area_planted * item.pasten * 1.25;
       return {
         area: area.name,
