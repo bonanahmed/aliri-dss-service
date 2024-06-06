@@ -166,8 +166,7 @@ const getPlantPatterns = async (filter: any, options: any, date: any): Promise<a
     docs: docs,
     totalDocs: areas.length,
     limit: parseInt(options.limit),
-    totalPages:
-      Math.round(areas.length / parseInt(options.limit)) === 0 ? 1 : Math.round(areas.length / parseInt(options.limit)),
+    totalPages: countTotalPage(areas, options),
     page: parseInt(options.page),
     // pagingCounter: 1,
     // hasPrevPage: false,
@@ -183,6 +182,12 @@ function paginate(array: any, page: number, pageSize: number) {
   const startIndex = page * pageSize;
   const endIndex = startIndex + pageSize;
   return array.slice(startIndex, endIndex);
+}
+
+function countTotalPage(areas: any, options: any) {
+  const totalPage =
+    Math.ceil(areas.length / parseInt(options.limit)) === 0 ? 1 : Math.ceil(areas.length / parseInt(options.limit));
+  return totalPage;
 }
 
 /**
