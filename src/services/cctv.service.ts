@@ -71,6 +71,7 @@ export const generateLinkHikVision = async (cctv: any) => {
       });
       const agent = new https.Agent({
         rejectUnauthorized: false, // Ignore SSL certificate errors
+        requestCert: false,
       });
       const response = await axios.post(`${link}`, body, {
         headers: headers,
