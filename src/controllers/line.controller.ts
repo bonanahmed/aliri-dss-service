@@ -11,7 +11,7 @@ const createLine = catchAsync(async (req, res) => {
 });
 
 const getLines = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search', 'type', 'node_id']);
+  const filter = pick(req.query, ['search', 'type', 'node_id', 'area_id']);
   const options = {
     ...pick(req.query, ['sortBy', 'limit', 'page']),
   };

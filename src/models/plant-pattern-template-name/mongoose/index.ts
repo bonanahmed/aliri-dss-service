@@ -6,6 +6,7 @@ import toJSON from '../../plugins/toJSON.plugin';
 
 export interface IPlantPatternTemplateName extends IDefaultData {
   name: string;
+  area_id: mongoose.Schema.Types.ObjectId;
 }
 
 export interface IPlantPatternTemplateNameDocument extends IPlantPatternTemplateName, Document {}
@@ -14,7 +15,7 @@ export interface IPlantPatternTemplateNameModel extends Model<IPlantPatternTempl
 
 const plantPatternTemplateNameSchema = new Schema<IPlantPatternTemplateName>({
   name: { type: String, required: true },
-
+  area_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'areas' },
   ...DefaultData,
 });
 

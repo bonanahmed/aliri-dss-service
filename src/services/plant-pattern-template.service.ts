@@ -39,6 +39,7 @@ const getPlantPatternTemplates = async (filter: any, options: any): Promise<any>
     filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
     delete filter.search;
   }
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
   const plantPatternTemplateNames: any = options.limit
     ? await PlantPatternTemplateName.paginate(filter, options)
     : await PlantPatternTemplateName.find(filter);

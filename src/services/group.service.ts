@@ -3,6 +3,7 @@ import { Group } from '../models/group'; // Import the IGroupDocument type from 
 import ApiError from '../utils/ApiError';
 import { IGroupDocument } from '../models/group/mongoose';
 import { PlantPatternTemplate } from '../models/plant-pattern-template';
+import { Area } from '../models/area';
 
 /**
  * Create a user
@@ -27,6 +28,7 @@ const getGroups = async (filter: any, options: any): Promise<any> => {
     filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
     delete filter.search;
   }
+  options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
   const groups = options.limit ? await Group.paginate(filter, options) : await Group.find(filter);
   return groups;
 };
@@ -35,11 +37,29 @@ const getGroupsWithPlantPattern = async (filter: any, options: any): Promise<any
     filter.$or = [{ name: { $regex: new RegExp(filter.search, 'i') } }];
     delete filter.search;
   }
+  if (filter.period) {
+  }
   const groups = await Group.find(filter);
   const dataReturns = await Promise.all(
     groups.map(async (group: any, index) => {
-      const plantPattern = await PlantPatternTemplate.find({
+      const areaDatas = await Area.find({
+        'detail.group': group.id,
+      });
+      let areaTotal = 0;
+      areaDatas.forEach((area: any) => {
+        areaTotal += area.detail?.standard_area ?? 0;
+      });
+      let plantPattern: any = await PlantPatternTemplate.find({
         plant_pattern_template_name_id: group.plant_pattern_template_name_id?._id,
+      });
+      // console.log(plantPattern);
+      plantPattern._doc = plantPattern.map((plant: any) => {
+        let flow_water_needed = plant.pasten * areaTotal;
+        plant._doc = {
+          ...plant._doc,
+          flow_water_needed,
+        };
+        return plant;
       });
 
       return {

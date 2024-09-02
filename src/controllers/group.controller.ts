@@ -12,14 +12,14 @@ const createGroup = catchAsync(async (req, res) => {
 });
 
 const getGroups = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search']);
+  const filter = pick(req.query, ['search', 'area_id']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await groupService.getGroups(filter, options);
   // res.send(result);
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
 const getGroupsWithPlantPattern = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search']);
+  const filter = pick(req.query, ['search', 'area_id', 'period']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await groupService.getGroupsWithPlantPattern(filter, options);
   // res.send(result);

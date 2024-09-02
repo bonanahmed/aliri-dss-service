@@ -7,6 +7,7 @@ import toJSON from '../../plugins/toJSON.plugin';
 export interface IGroup extends IDefaultData {
   name: string;
   period: string;
+  area_id: mongoose.Schema.Types.ObjectId;
   plant_pattern_template_name_id?: mongoose.Schema.Types.ObjectId | null;
 }
 
@@ -17,6 +18,7 @@ export interface IGroupModel extends Model<IGroupDocument> {}
 const groupSchema = new Schema<IGroup>({
   name: { type: String, required: true },
   period: { type: String, required: true },
+  area_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'areas' },
   plant_pattern_template_name_id: {
     type: mongoose.Schema.Types.ObjectId,
     required: false,
