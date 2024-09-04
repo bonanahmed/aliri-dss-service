@@ -69,8 +69,10 @@ export const generateLinkHikVision = async (cctv: any) => {
         let value = item.split(':')[1];
         body[key] = value;
       });
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       const agent = new https.Agent({
         rejectUnauthorized: false, // Ignore SSL certificate errors
+        requestCert: false,
       });
       const response = await axios.post(`${link}`, body, {
         headers: headers,
