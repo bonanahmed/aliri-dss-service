@@ -299,7 +299,7 @@ const getNodesByLine = async (line_id: string) => {
 const getDebitKetersediaan = async () => {
   try {
     const token = (
-      await axios.post('http://192.168.50.58:8733/TopkapiService/LogIn', {
+      await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/LogIn', {
         AccountName: 'ADMINISTRATOR',
         Password: 'wiratama1791',
         Timeout: 99999,
@@ -307,7 +307,7 @@ const getDebitKetersediaan = async () => {
     ).data.LogInResult.Token;
     let totalDebit = 0;
     const dataDebit = (
-      await axios.post('http://192.168.50.58:8733/TopkapiService/GetRealTimeValues', {
+      await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/GetRealTimeValues', {
         FormulaList: [
           {
             Formula: 'B_KP.0.00_DEBIT_AVE_5DAY',
@@ -333,7 +333,7 @@ const getDebitKetersediaan = async () => {
 const getRealtimeMonitoringDebit = async () => {
   try {
     const token = (
-      await axios.post('http://192.168.50.58:8733/TopkapiService/LogIn', {
+      await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/LogIn', {
         AccountName: 'ADMINISTRATOR',
         Password: 'wiratama1791',
         Timeout: 99999,
@@ -341,7 +341,7 @@ const getRealtimeMonitoringDebit = async () => {
     ).data.LogInResult.Token;
     let dataReturn: any = {};
     const dataMonitoring = (
-      await axios.post('http://192.168.50.58:8733/TopkapiService/GetRealTimeValues', {
+      await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/GetRealTimeValues', {
         FormulaList: [
           {
             Formula: 'B_KP.6.1_LEVEL',

@@ -12,7 +12,7 @@ export const getRealtimeValues = async (body: Array<string>) => {
     });
     const token = await getToken();
     const datas = (
-      await axios.post('http://192.168.50.58:8733/TopkapiService/GetRealTimeValues', {
+      await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/GetRealTimeValues', {
         FormulaList: FormulaList,
         Token: token,
       })
@@ -26,7 +26,7 @@ export const getRealtimeValues = async (body: Array<string>) => {
 
 const getToken = async () => {
   const token = (
-    await axios.post('http://192.168.50.58:8733/TopkapiService/LogIn', {
+    await axios.post('https://65d7-202-169-239-12.ngrok-free.app/TopkapiService/LogIn', {
       AccountName: 'ADMINISTRATOR',
       Password: 'wiratama1791',
       Timeout: 99999,
