@@ -33,13 +33,17 @@ export const getMaps = async (filter: any): Promise<any> => {
       $ne: 'tersier',
     },
     location: { $exists: true },
+    'location.data': { $exists: true },
   }).select('id name location type');
   const areas = await Area.find({
-    type: {
-      $ne: 'daerah irigasi',
-    },
-    location: { $exists: true },
-  }).select('id name location type');
+    // type: {
+    //   $ne: 'daerah irigasi',
+    // },
+    $or: [
+      { $and: [{ location: { $exists: true } }, { 'location.data': { $exists: true } }] },
+      { link_google_map: { $exists: true } },
+    ],
+  }).select('id name location type link_google_map');
   // assignPrevNode();
   return {
     nodes,

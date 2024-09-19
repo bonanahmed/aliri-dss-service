@@ -36,7 +36,9 @@ router
     areaController.deleteArea
   );
 
-router.route('/maps/list').get(areaController.getMaps);
+// router.route('/maps/list').get(areaController.getMaps);
+
+router.route('/public/list').get(areaController.getAreas);
 
 router.route('/data-sensor/:areaId').get(areaController.getAreaSensor);
 
@@ -59,6 +61,8 @@ router.route('/configuration/create').post(areaController.createConfiguration);
 router.route('/configuration/:configId').delete(areaController.deleteConfiguration);
 
 router.route('/configuration/:configId').get(areaController.getConfigurationDetail);
+
+router.route('/configuration/area/:areaId').get(areaController.getConfigurationDetail);
 
 router.route('/configuration/:configId').patch(areaController.updateConfiguration);
 

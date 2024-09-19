@@ -38,15 +38,15 @@ export const deleteArea = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, 'delete success', area);
 });
 
-export const getMaps = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search', 'node_id']);
-  const options = {
-    ...pick(req.query, ['sortBy', 'limit', 'page']),
-  };
+// export const getMaps = catchAsync(async (req, res) => {
+//   const filter = pick(req.query, ['search', 'node_id', 'id']);
+//   const options = {
+//     ...pick(req.query, ['sortBy', 'limit', 'page']),
+//   };
 
-  const result = await areaService.getMaps(filter, options);
-  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
-});
+//   const result = await areaService.getMaps(filter, options);
+//   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+// });
 
 export const upsertDataAreaSensor = catchAsync(async (req, res) => {
   const body = req.body;
@@ -112,6 +112,14 @@ export const deleteConfiguration = catchAsync(async (req, res) => {
 
 export const getConfigurationDetail = catchAsync(async (req, res) => {
   const area = await areaService.getConfigurationDetailById(req.params.configId);
+  if (!area) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
+  }
+  ApiResponse(res, httpStatus.OK, httpStatus[200], area);
+});
+
+export const getConfigurationDetailByAreaId = catchAsync(async (req, res) => {
+  const area = await areaService.getConfigurationDetailByAreaId(req.params.areaId);
   if (!area) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
   }
