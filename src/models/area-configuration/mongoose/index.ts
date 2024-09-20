@@ -16,7 +16,7 @@ export interface IAreaConfigurationDocument extends IAreaConfiguration, Document
 export interface IAreaConfigurationModel extends Model<IAreaConfigurationDocument> {}
 
 const configurationSchema = new Schema<IAreaConfiguration>({
-  key: { type: String, required: true, unique: true },
+  key: { type: String, required: true },
   label: { type: String, required: true },
   value: { type: String, required: true },
   area_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'areas' },

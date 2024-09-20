@@ -4,6 +4,7 @@ import ApiError from '../utils/ApiError';
 import { Node } from '../models/node';
 import Line from '../models/line/mongoose';
 import Area from '../models/area/mongoose';
+import AreaConfiguration from '../models/area-configuration/mongoose';
 
 /**
  * Get user by id
@@ -32,23 +33,26 @@ export const getMaps = async (filter: any): Promise<any> => {
     type: {
       $ne: 'tersier',
     },
-    location: { $exists: true },
-    'location.data': { $exists: true },
+    'location.data.0': { $exists: true },
   }).select('id name location type');
   const areas = await Area.find({
     // type: {
     //   $ne: 'daerah irigasi',
     // },
     $or: [
-      { $and: [{ location: { $exists: true } }, { 'location.data': { $exists: true } }] },
+      { $and: [{ location: { $exists: true } }, { 'location.data.0': { $exists: true } }] },
       { link_google_map: { $exists: true } },
     ],
   }).select('id name location type link_google_map');
-  // assignPrevNode();
+
+  const area_config = filter.area_id
+    ? await AreaConfiguration.findOne({ area_id: filter.area_id, key: 'initial_lat_long' })
+    : null;
   return {
     nodes,
     lines,
     areas,
+    area_config,
   };
 };
 

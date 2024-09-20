@@ -11,7 +11,7 @@ export const getDashboard = catchAsync(async (req, res) => {
 });
 
 export const getMaps = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search']);
+  const filter = pick(req.query, ['search', 'area_id']);
   const result = await dashboardService.getMaps(filter);
   ApiResponse(res, httpStatus.OK, httpStatus[200], result);
 });
