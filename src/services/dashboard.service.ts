@@ -3,8 +3,9 @@ import { Template } from '../models/template'; // Import the ITemplateDocument t
 import ApiError from '../utils/ApiError';
 import { Node } from '../models/node';
 import Line from '../models/line/mongoose';
-import Area from '../models/area/mongoose';
+import Area, { IAreaDocument } from '../models/area/mongoose';
 import AreaConfiguration from '../models/area-configuration/mongoose';
+import { FilterQuery } from 'mongoose';
 
 /**
  * Get user by id
@@ -35,18 +36,26 @@ export const getMaps = async (filter: any): Promise<any> => {
     },
     'location.data.0': { $exists: true },
   }).select('id name location type');
-  const areas = await Area.find({
+  let areaFilter: FilterQuery<IAreaDocument> = {};
+  if (filter?.area_id)
+    areaFilter = {
+      _id: filter?.area_id,
+    };
+
+  areaFilter = {
     // type: {
     //   $ne: 'daerah irigasi',
     // },
+    ...areaFilter,
     $or: [
       { $and: [{ location: { $exists: true } }, { 'location.data.0': { $exists: true } }] },
       { link_google_map: { $exists: true } },
     ],
-  }).select('id name location type link_google_map');
+  };
+  const areas: IAreaDocument[] = await Area.find(areaFilter).select('id name location type link_google_map');
 
-  const area_config = filter.area_id
-    ? await AreaConfiguration.findOne({ area_id: filter.area_id, key: 'initial_lat_long' })
+  const area_config = filter?.area_id
+    ? await AreaConfiguration.findOne({ area_id: filter?.area_id, key: 'initial_lat_long' })
     : null;
   return {
     nodes,

@@ -13,7 +13,7 @@ export const createNode = catchAsync(async (req, res) => {
 });
 
 export const getNodes = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['search', 'type', 'parent_id']);
+  const filter = pick(req.query, ['search', 'type', 'parent_id', 'area_id']);
   const options = {
     ...pick(req.query, ['sortBy', 'limit', 'page']),
   };

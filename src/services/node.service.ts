@@ -54,6 +54,7 @@ export const getNodes = async (filter: any, options: any): Promise<any> => {
       options: { strictPopulate: false },
     },
   ];
+  console.log(filter);
   const nodes = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return nodes;
 };
