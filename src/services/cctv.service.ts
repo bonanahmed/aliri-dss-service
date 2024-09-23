@@ -32,7 +32,12 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
     item.detail.cctv_list.forEach((dataCCTV: any) => {
       dataReturn.push({
         name: item.name,
-        cctv_list: [dataCCTV],
+        cctv_list: [
+          {
+            ...dataCCTV,
+            image: item.images[0]?.content,
+          },
+        ],
       });
     });
   });
@@ -44,7 +49,7 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
 export const generateLinkHikVision = async (cctv: any) => {
   try {
     if (cctv.type === 'hikvision') {
-      const link = cctv.link.split('?')[0];
+      let link = cctv.link.split('?')[0];
       // link = link.replace('192.168.50.58', '202.169.239.21');
       const query = cctv.link.split('?')[1];
       const header = query.split('&')[0].split('header=')[1];
