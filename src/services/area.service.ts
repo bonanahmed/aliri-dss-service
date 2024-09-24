@@ -10,6 +10,7 @@ import AreaConfiguration, { IAreaConfigurationDocument } from '../models/area-co
 import Line from '../models/line/mongoose';
 import { calculateFlow } from './node.service';
 import { NodeToLineDataActual } from '../models/actual-flow';
+import { AreaDetail } from '../models/area-detail';
 
 /**
  * Create a user
@@ -58,6 +59,24 @@ export const getAreas = async (filter: any, options: any): Promise<any> => {
  */
 export const getAreaById = async (id: string): Promise<IAreaDocument | null> => {
   return await Area.findById(id);
+};
+
+/**
+ * Get user by id
+ * @param {string} id
+ * @returns {Promise<IAreaDocument | null>}
+ */
+export const getAreaPublicDetailById = async (id: string): Promise<any | null> => {
+  const area = await Area.findById(id);
+  const area_detail = await AreaDetail.findOne({
+    area_id: id,
+  });
+  return {
+    id: id,
+    name: area?.name,
+    description: area_detail?.description,
+    image: area?.images[0]?.content,
+  };
 };
 
 /**

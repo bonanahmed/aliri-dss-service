@@ -28,6 +28,14 @@ export const getArea = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], area);
 });
 
+export const getAreaPublicDetail = catchAsync(async (req, res) => {
+  const area = await areaService.getAreaPublicDetailById(req.params.areaId);
+  if (!area) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
+  }
+  ApiResponse(res, httpStatus.OK, httpStatus[200], area);
+});
+
 export const updateArea = catchAsync(async (req, res) => {
   const area = await areaService.updateAreaById(req.params.areaId, req.body);
   ApiResponse(res, httpStatus.OK, 'update success', area);

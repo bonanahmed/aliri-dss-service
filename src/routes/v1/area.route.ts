@@ -40,6 +40,8 @@ router
 
 router.route('/public/list').get(areaController.getAreas);
 
+router.route('/public/detail/:areaId').get(areaController.getAreaPublicDetail);
+
 router.route('/data-sensor/:areaId').get(areaController.getAreaSensor);
 
 router.route('/data-sensor/:areaId/list').get(areaController.getAreaSensors);
