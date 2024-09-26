@@ -54,7 +54,6 @@ export const getNodes = async (filter: any, options: any): Promise<any> => {
       options: { strictPopulate: false },
     },
   ];
-  console.log(filter);
   const nodes = options.limit ? await Node.paginate(filter, options) : await Node.find(filter);
   return nodes;
 };
@@ -615,7 +614,7 @@ const calculateDistance = async (prev_id: any) => {
     const nodeLineExist = await Line.find({ node_id: prev_id });
     if (nodeLineExist.length === 0) {
       const node = await Node.findById(prev_id);
-      console.log('\t' + node?.name);
+      // console.log('\t' + node?.name);
       distance_total += node?.distance_to_prev ?? 0;
       if (node?.prev_id) {
         distance_total += await calculateDistance(node?.prev_id);

@@ -74,6 +74,12 @@ export const getAreaSensors = catchAsync(async (req, res) => {
   ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
 });
 
+export const getAreaSensorsPapanEksploitasi = catchAsync(async (req, res) => {
+  const query = req.query;
+  const sensor = await areaService.getAreaSensorsPapanEksploitasi(req.params.areaId, query);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);
+});
+
 export const getAreaSensorDetail = catchAsync(async (req, res) => {
   const sensor = await areaService.getAreaSensorDetail(req.params.sensorId);
   ApiResponse(res, httpStatus.OK, httpStatus[200], sensor);

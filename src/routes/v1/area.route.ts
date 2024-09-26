@@ -44,6 +44,8 @@ router.route('/public/detail/:areaId').get(areaController.getAreaPublicDetail);
 
 router.route('/data-sensor/:areaId').get(areaController.getAreaSensor);
 
+router.route('/data-sensor/papan-eksploitasi/:areaId').get(areaController.getAreaSensorsPapanEksploitasi);
+
 router.route('/data-sensor/:areaId/list').get(areaController.getAreaSensors);
 
 router.route('/data-sensor/:sensorId/detail').get(areaController.getAreaSensorDetail);

@@ -142,7 +142,8 @@ export const deleteAreaById = async (areaId: string): Promise<IAreaDocument | nu
  */
 export const upsertDataAreaSensor = async (data: any): Promise<any> => {
   const sensor = await AreaSensor.findOneAndUpdate(
-    { area_id: data.area_id, sensor_type: data.sensor_type },
+    // { area_id: data.area_id, sensor_type: data.sensor_type },
+    { area_id: data.area_id, sensor_code: data.sensor_code },
     {
       ...data,
     },
@@ -179,6 +180,39 @@ export const getAreaSensor = async (areaId: string, filter: any): Promise<any> =
 export const getAreaSensors = async (areaId: string, filter: any): Promise<any> => {
   const areaSensor = await AreaSensor.find({ area_id: areaId, ...filter });
   return areaSensor;
+};
+
+/**
+ * Get Area Sensor List by areaId
+ * @param {string} areaId
+ * @returns {Promise<any>}
+ */
+export const getAreaSensorsPapanEksploitasi = async (areaId: string, filter: any): Promise<any> => {
+  const areaSensors = await AreaSensor.find({ area_id: areaId, ...filter });
+  let areaSensorValue = 0;
+  const updateDataSensors = areaSensors.map((areaSensor) => {
+    return areaSensor.sensor_code;
+  });
+  const sensorDatas = await getRealtimeValues(updateDataSensors ?? []);
+  // Use Promise.all to update sensor values in parallel
+  await Promise.all(
+    sensorDatas.map(async (sensorData: any) => {
+      // Update sensor value in the database
+      await AreaSensor.findOneAndUpdate(
+        {
+          area_id: areaId,
+          sensor_code: sensorData.Formula,
+        },
+        {
+          sensor_value: sensorData.Value,
+        }
+      );
+
+      // Safely parse and add sensor value to total
+      areaSensorValue += parseFloat(sensorData.Value) || 0;
+    })
+  );
+  return areaSensorValue;
 };
 
 /**
@@ -328,7 +362,6 @@ export const getFlowSummaries = async (filter: any, options: any): Promise<any> 
   options.populate = [{ path: 'area_id', options: { strictPopulate: false } }];
   options.select = '_id id name node_id';
   const summaries: any = options.limit ? await Line.paginate(filter, options) : await Line.find(filter);
-  console.log(summaries);
   summaries.docs = await Promise.all(
     summaries.docs.map(async (item: any, index: number) => {
       let dataFlow: any;
