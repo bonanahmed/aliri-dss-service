@@ -153,3 +153,16 @@ export const getFlowSummaries = catchAsync(async (req, res) => {
   const summaries = await areaService.getFlowSummaries(filter, options);
   ApiResponse(res, httpStatus.OK, httpStatus[200], summaries);
 });
+
+export const getAreasPublic = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['search', 'type', 'parent_id']);
+  const options = {
+    ...pick(req.query, ['sortBy', 'limit', 'page']),
+  };
+  if (filter.parent_id === 'null')
+    filter.parent_id = {
+      $exists: false,
+    };
+  const result = await areaService.getAreas(filter, options);
+  ApiResponse(res, httpStatus.OK, httpStatus[200], result);
+});

@@ -38,7 +38,7 @@ router
 
 // router.route('/maps/list').get(areaController.getMaps);
 
-router.route('/public/list').get(areaController.getAreas);
+router.route('/public/list').get(areaController.getAreasPublic);
 
 router.route('/public/detail/:areaId').get(areaController.getAreaPublicDetail);
 

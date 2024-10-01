@@ -35,7 +35,7 @@ export const getCCTV = async (filter: any, options: any): Promise<any> => {
         cctv_list: [
           {
             ...dataCCTV,
-            image: item.images[0]?.content,
+            image: dataCCTV.image ? dataCCTV.image : item.images[0]?.content,
           },
         ],
       });
