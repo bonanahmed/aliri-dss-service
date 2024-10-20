@@ -31,6 +31,7 @@
   },
   "scripts": {
     "start": "pm2 start ecosystem.config.json --no-daemon",
+    "build": "rimraf ./dist && tsc",
     "dev": "cross-env NODE_ENV=development nodemon src/index.ts",
     "test": "jest -i --colors --verbose --detectOpenHandles",
     "test:watch": "jest -i --watchAll",
@@ -56,10 +57,14 @@
     "@types/express-fileupload": "^1.4.4",
     "@types/express-session": "^1.17.9",
     "@types/mongoose-paginate-v2": "^1.6.5",
+    "@types/node": "^22.7.7",
     "@types/nodemailer": "^6.4.10",
     "@types/passport": "^1.0.12",
     "@types/passport-jwt": "^3.0.9",
     "@types/validator": "^13.11.1",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0"
   }
 }
