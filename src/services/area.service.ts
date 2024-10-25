@@ -17,8 +17,21 @@ import { AreaDetail } from '../models/area-detail';
  * @param {Object} body
  * @returns {Promise<IAreaDocument>}
  */
-export const createArea = async (body: any): Promise<IAreaDocument> => {
-  return await Area.create(body);
+export const createArea = async (body: any): Promise<any> => {
+  const area = await Area.create(body);
+  if (area) {
+    if (body.area_information) {
+      const areaDetail = await AreaDetail.create({
+        area_id: area.id,
+        description: body.area_information,
+      });
+      return {
+        area,
+        areaDetail,
+      };
+    }
+    return area;
+  }
 };
 
 /**
@@ -57,8 +70,20 @@ export const getAreas = async (filter: any, options: any): Promise<any> => {
  * @param {string} id
  * @returns {Promise<IAreaDocument | null>}
  */
-export const getAreaById = async (id: string): Promise<IAreaDocument | null> => {
-  return await Area.findById(id);
+export const getAreaById = async (id: string): Promise<any | null> => {
+  const area: any = await Area.findById(id);
+  if (area) {
+    const areaDetail = await AreaDetail.findOne({
+      area_id: area.id,
+    });
+    if (areaDetail) {
+      return {
+        ...area._doc,
+        information: areaDetail,
+      };
+    }
+  }
+  return area;
 };
 
 /**
@@ -85,14 +110,27 @@ export const getAreaPublicDetailById = async (id: string): Promise<any | null> =
  * @param {Object} updateBody
  * @returns {Promise<IAreaDocument | null>}
  */
-export const updateAreaById = async (areaId: string, updateBody: any): Promise<IAreaDocument | null> => {
+export const updateAreaById = async (areaId: string, updateBody: any): Promise<any | null> => {
   const area = await getAreaById(areaId);
   if (!area) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area not found');
   }
-  Object.assign(area, updateBody);
-  await area.save();
-  return area;
+  // Object.assign(area, updateBody);
+  // await area.save();
+  const areaUpdate: any = await Area.findByIdAndUpdate(areaId, updateBody);
+  if (updateBody.area_information) {
+    const areaDetail = await AreaDetail.findOneAndUpdate(
+      {
+        area_id: areaId,
+      },
+      {
+        description: updateBody.area_information,
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+    return { ...areaUpdate._doc, areaDetail };
+  }
+  return areaUpdate;
 };
 
 /**
