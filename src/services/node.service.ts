@@ -256,7 +256,7 @@ const findAreaDetail = async (plant_patterns: any) => {
       let detail = {};
       const rawArea =
         (areaDetail[plant.plant_type]?.total_area ? areaDetail[plant.plant_type]?.total_area ?? 0 : 0) +
-          plant_pattern.raw_material_area_planted ?? 0;
+        plant_pattern.raw_material_area_planted;
       detail = {
         total_area: isNaN(rawArea) ? 0 : rawArea,
         pasten: plant.pasten,

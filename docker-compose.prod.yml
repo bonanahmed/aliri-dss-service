@@ -2,21 +2,56 @@ version: '3'
 
 volumes:
   dbdata:
+networks:
+  traefik:
+    external: true
 
 services:
   node-app:
     container_name: node-app-prod
-    build: .
+    build:
+      context: .
+      target: build
     env_file:
       - .env
-    ports:
-      - 8001:8000
+    # ports:
+    #   - 5000:8000
+    command: npm run dev
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.airso-api.entrypoints=web,websecure'
+      - 'traefik.http.routers.airso-api.rule=Host(`api.airso.id`)'
+      - 'traefik.http.routers.airso-api.service=airso-api'
+      - 'traefik.http.routers.airso-api.tls=true'
+      - 'traefik.http.routers.airso-api.tls.certresolver=production'
+      - 'traefik.http.services.airso-api.loadbalancer.server.port=8000'
+      - 'traefik.docker.network=traefik'
+      # - "traefik.http.services.airso-api.loadbalancer.server.forwardingTimeouts.dialTimeout=30s"
+      # - "traefik.http.services.airso-api.loadbalancer.server.forwardingTimeouts.responseHeaderTimeout=60s"
+      # - "traefik.http.services.airso-api.loadbalancer.server.forwardingTimeouts.idleTimeout=120s"
+      # - "traefik.http.middlewares.myapp-timeout.forwardingTimeouts.dialTimeout=30s"
+      # - "traefik.http.middlewares.myapp-timeout.forwardingTimeouts.responseTimeout=30s"
+      # - "traefik.http.middlewares.myapp-timeout.forwardingTimeouts.idleConnTimeout=30s"
+      # - "traefik.http.routers.airso-api.middlewares=myapp-timeout"
+    networks:
+      - traefik
   mongodb-app:
     container_name: mongodb-app
     image: mongo
     ports:
-      - 37017:27017
+      - 5000:27017
     environment:
       - MONGODB_DATABASE='wsi-irigasi'
     volumes:
       - dbdata:/data/db
+    # labels:
+    #   - 'traefik.enable=true'
+    #   - 'traefik.tcp.routers.airso-mongodb.entrypoints=mongodb'
+    #   - 'traefik.tcp.routers.airso-mongodb.rule=Host(`mongodb.airso.id`)'
+    #   - 'traefik.tcp.routers.airso-mongodb.service=airso-mongodb'
+    #   - 'traefik.tcp.routers.airso-mongodb.tls=true'
+    #   - 'traefik.tcp.routers.airso-mongodb.tls.certresolver=production'
+    #   - 'traefik.tcp.services.airso-mongodb.loadbalancer.server.port=27017'
+    #   - 'traefik.docker.network=traefik'
+    networks:
+      - traefik
