@@ -659,12 +659,12 @@ export const getDataNodeSensor = async (nodeId: string, lineId: string, filter: 
   let sensorFind = await NodeSensor.findOne({ node_id: nodeId, direction_line: lineId, ...filter }).populate(
     'direction_line'
   );
-  if (sensorFind?.sensor_code) {
-    const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
-    await NodeSensor.findByIdAndUpdate(sensorFind.id, {
-      sensor_value: sensorData,
-    });
-  }
+  // if (sensorFind?.sensor_code) {
+  //   const sensorData = (await getRealtimeValues([sensorFind?.sensor_code]))[0].Value;
+  //   await NodeSensor.findByIdAndUpdate(sensorFind.id, {
+  //     sensor_value: sensorData,
+  //   });
+  // }
   const sensor = await NodeSensor.findById(sensorFind?.id);
   return sensor;
 };

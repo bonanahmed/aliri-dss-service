@@ -200,12 +200,12 @@ export const getAreaSensor = async (areaId: string, filter: any): Promise<any> =
   if (!areaSensor) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Area Sensor not found');
   }
-  if (areaSensor?.sensor_code) {
-    const sensorData = (await getRealtimeValues([areaSensor?.sensor_code]))[0].Value;
-    await AreaSensor.findByIdAndUpdate(areaSensor.id, {
-      sensor_value: sensorData,
-    });
-  }
+  // if (areaSensor?.sensor_code) {
+  //   const sensorData = (await getRealtimeValues([areaSensor?.sensor_code]))[0].Value;
+  //   await AreaSensor.findByIdAndUpdate(areaSensor.id, {
+  //     sensor_value: sensorData,
+  //   });
+  // }
   const sensor = await AreaSensor.findById(areaSensor?.id);
   return sensor;
 };
@@ -229,27 +229,28 @@ export const getAreaSensorsPapanEksploitasi = async (areaId: string, filter: any
   const areaSensors = await AreaSensor.find({ area_id: areaId, ...filter });
   let areaSensorValue = 0;
   const updateDataSensors = areaSensors.map((areaSensor) => {
+    areaSensorValue += parseFloat(areaSensor.sensor_value ?? '0') || 0;
     return areaSensor.sensor_code;
   });
-  const sensorDatas = await getRealtimeValues(updateDataSensors ?? []);
-  // Use Promise.all to update sensor values in parallel
-  await Promise.all(
-    sensorDatas.map(async (sensorData: any) => {
-      // Update sensor value in the database
-      await AreaSensor.findOneAndUpdate(
-        {
-          area_id: areaId,
-          sensor_code: sensorData.Formula,
-        },
-        {
-          sensor_value: sensorData.Value,
-        }
-      );
+  // const sensorDatas = await getRealtimeValues(updateDataSensors ?? []);
+  // // Use Promise.all to update sensor values in parallel
+  // await Promise.all(
+  //   sensorDatas.map(async (sensorData: any) => {
+  //     // Update sensor value in the database
+  //     await AreaSensor.findOneAndUpdate(
+  //       {
+  //         area_id: areaId,
+  //         sensor_code: sensorData.Formula,
+  //       },
+  //       {
+  //         sensor_value: sensorData.Value,
+  //       }
+  //     );
 
-      // Safely parse and add sensor value to total
-      areaSensorValue += parseFloat(sensorData.Value) || 0;
-    })
-  );
+  //     // Safely parse and add sensor value to total
+  //     areaSensorValue += parseFloat(sensorData.Value) || 0;
+  //   })
+  // );
   return areaSensorValue;
 };
 
