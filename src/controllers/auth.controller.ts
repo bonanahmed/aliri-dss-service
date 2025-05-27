@@ -12,6 +12,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   const account = await authService.registerAccount(body);
   const user = await userService.createUser({
     account_id: account.id,
+    gender:body.gender,
   });
   const tokens = await tokenService.generateAuthTokens(account);
   ApiResponse(res, httpStatus.CREATED, 'Daftar Berhasil', {
